@@ -27,7 +27,8 @@
         "googleMaps": {
           "apiKey": "AIzaSyCv95QW0IJO_m718bSrFlgkvMM5QmgXWGA"
         }
-      }
+      },
+      "package": "com.cutiepie.ev"
     },
     "web": {
       "output": "static",

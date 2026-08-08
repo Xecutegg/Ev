@@ -8,13 +8,13 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
-    SafeAreaView,
     StatusBar,
     Platform,
     Modal,
     Animated,
     Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -632,16 +632,16 @@ export default function PartnerScreen() {
 
             <View style={styles.stationMetaRow}>
                 <View style={styles.metaChip}>
-                    <Ionicons name="flash-outline" size={14} color="#10b981" />
+                    <Ionicons name="flash-outline" size={14} color="#76C815" />
                     <Text style={styles.metaValue}>{st.powerOutput}</Text>
                 </View>
                 <View style={styles.metaChip}>
-                    <Ionicons name="hardware-chip-outline" size={14} color="#10b981" />
+                    <Ionicons name="hardware-chip-outline" size={14} color="#76C815" />
                     <Text style={styles.metaValue}>{st.totalPorts} Ports</Text>
                 </View>
                 <View style={styles.metaChip}>
-                    <Ionicons name="pricetag-outline" size={14} color="#059669" />
-                    <Text style={[styles.metaValue, { color: '#059669', fontWeight: '800' }]}>
+                    <Ionicons name="pricetag-outline" size={14} color="#76C815" />
+                    <Text style={[styles.metaValue, { color: '#76C815', fontWeight: '800' }]}>
                         ₹{st.priceRate} / {st.pricingType === 'per_kwh' ? 'kWh' : st.pricingType === 'per_hour' ? 'hr' : 'min'}
                     </Text>
                 </View>
@@ -654,10 +654,10 @@ export default function PartnerScreen() {
                     activeOpacity={0.8}
                 >
                     <LinearGradient
-                        colors={['#ecfdf5', '#d1fae5']}
+                        colors={['#F0F9ED', '#E2F5D6']}
                         style={styles.editGradient}
                     >
-                        <Ionicons name="create-outline" size={16} color="#059669" />
+                        <Ionicons name="create-outline" size={16} color="#76C815" />
                         <Text style={styles.editButtonText}>Edit</Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -1480,9 +1480,9 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     verifiedPartnerCard: {
-        backgroundColor: '#f0fdf4',
-        borderColor: '#a7f3d0',
-        shadowColor: '#10b981',
+        backgroundColor: '#F4FBF4',
+        borderColor: '#D4EFC3',
+        shadowColor: '#76C815',
         shadowOpacity: 0.12,
     },
     partnerInfoIcon: {
@@ -1491,7 +1491,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#059669',
+        shadowColor: '#76C815',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 8,
@@ -1532,16 +1532,16 @@ const styles = StyleSheet.create({
         width: 28,
         height: 28,
         borderRadius: 14,
-        backgroundColor: '#ecfdf5',
+        backgroundColor: '#F0F9ED',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#a7f3d0',
+        borderColor: '#D4EFC3',
     },
     stationCountText: {
         fontSize: 12,
         fontWeight: '800',
-        color: '#059669',
+        color: '#76C815',
     },
     sectionCard: {
         backgroundColor: '#ffffff',

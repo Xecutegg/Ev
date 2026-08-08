@@ -11,7 +11,6 @@ import {
     StatusBar,
     Animated,
     Dimensions,
-    SafeAreaView,
     Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -560,7 +559,7 @@ function HomeScreen() {
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       <style>
-        html, body, #map { height: 100%; margin: 0; padding: 0; background: #f0fdf4; }
+        html, body, #map { height: 100%; margin: 0; padding: 0; background: #F4FBF4; }
         .gmnoprint, .gm-style-cc, a[href^="https://maps.google.com/maps"], a[aria-label^="Google"] {
           display: none !important;
         }
@@ -593,7 +592,7 @@ function HomeScreen() {
             title: "${user?.name || 'User Location'}",
             icon: {
               path: google.maps.SymbolPath.CIRCLE,
-              fillColor: '#10b981',
+              fillColor: '#76C815',
               fillOpacity: 1,
               strokeColor: '#ffffff',
               strokeWeight: 4,
@@ -608,9 +607,9 @@ function HomeScreen() {
             map: gMap,
             icon: {
               path: google.maps.SymbolPath.CIRCLE,
-              fillColor: '#10b981',
+              fillColor: '#76C815',
               fillOpacity: 0.15,
-              strokeColor: '#10b981',
+              strokeColor: '#76C815',
               strokeWeight: 1.5,
               scale: 22,
               anchor: new google.maps.Point(0, 0)
@@ -801,7 +800,7 @@ function HomeScreen() {
                                 activeOpacity={0.8}
                             >
                                 <LinearGradient
-                                    colors={['#10b981', '#059669']}
+                                    colors={['#76C815', '#65B811']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     style={styles.partnerGradient}
@@ -817,7 +816,7 @@ function HomeScreen() {
                                 activeOpacity={0.8}
                             >
                                 <LinearGradient
-                                    colors={['#10b981', '#059669']}
+                                    colors={['#76C815', '#65B811']}
                                     style={styles.avatarGradient}
                                 >
                                     <Text style={styles.avatarText}>{userInitial}</Text>
@@ -855,7 +854,7 @@ function HomeScreen() {
 
                         <View style={styles.profileCard}>
                             <LinearGradient
-                                colors={['#10b981', '#059669']}
+                                colors={['#76C815', '#65B811']}
                                 style={styles.bigAvatarGradient}
                             >
                                 <Text style={styles.bigAvatarText}>{userInitial}</Text>
@@ -1047,7 +1046,7 @@ function HomeScreen() {
                                             disabled={isBookingSubmitting}
                                             activeOpacity={0.8}
                                         >
-                                            <LinearGradient colors={['#10b981', '#059669']} style={styles.payBtnGradient}>
+                                            <LinearGradient colors={['#76C815', '#65B811']} style={styles.payBtnGradient}>
                                                 {isBookingSubmitting ? (
                                                     <ActivityIndicator size="small" color="#ffffff" />
                                                 ) : (
@@ -1145,7 +1144,7 @@ function HomeScreen() {
                     <View style={styles.successCard}>
                         {/* Celebrating Icon Ring */}
                         <View style={styles.successIconOuterRing}>
-                            <LinearGradient colors={['#10b981', '#059669']} style={styles.successIconBadge}>
+                            <LinearGradient colors={['#76C815', '#65B811']} style={styles.successIconBadge}>
                                 <Ionicons name="checkmark-sharp" size={38} color="#ffffff" />
                             </LinearGradient>
                         </View>
@@ -1183,7 +1182,7 @@ function HomeScreen() {
                             }}
                             activeOpacity={0.8}
                         >
-                            <LinearGradient colors={['#10b981', '#047857']} style={styles.doneBtnGradient}>
+                            <LinearGradient colors={['#76C815', '#5BA70E']} style={styles.doneBtnGradient}>
                                 <Ionicons name="list" size={18} color="#ffffff" />
                                 <Text style={styles.doneBtnText}>View Booking History</Text>
                             </LinearGradient>
@@ -1198,7 +1197,7 @@ function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0fdf4',
+        backgroundColor: '#F4FBF4',
     },
     header: {
         position: 'absolute',
@@ -1322,20 +1321,20 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: 'rgba(16, 185, 129, 0.15)',
+        backgroundColor: 'rgba(118, 200, 21, 0.18)',
         borderWidth: 1.5,
-        borderColor: 'rgba(16, 185, 129, 0.3)',
+        borderColor: 'rgba(118, 200, 21, 0.35)',
     },
     gmapDot: {
         width: 24,
         height: 24,
         borderRadius: 12,
-        backgroundColor: '#10b981',
+        backgroundColor: '#76C815',
         borderWidth: 4,
         borderColor: '#ffffff',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#10b981',
+        shadowColor: '#76C815',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 6,
@@ -1489,14 +1488,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        backgroundColor: '#ecfdf5',
+        backgroundColor: '#F0F9ED',
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: 12,
     },
     profileUsername: {
         fontSize: 13,
-        color: '#10b981',
+        color: '#76C815',
         fontWeight: '700',
     },
     infoSection: {
@@ -1517,7 +1516,7 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: '#ecfdf5',
+        backgroundColor: '#F0F9ED',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -1554,79 +1553,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
     },
-    gmapMarkerContainer: {
-        width: 48,
-        height: 48,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    gmapOuterRing: {
-        position: 'absolute',
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: 'rgba(16, 185, 129, 0.18)',
-        borderWidth: 1.5,
-        borderColor: 'rgba(16, 185, 129, 0.35)',
-    },
-    gmapDot: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#10b981',
-        borderWidth: 4,
-        borderColor: '#ffffff',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#10b981',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    gmapDotInner: {
-        width: 0,
-        height: 0,
-    },
-    teardropMarkerContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    teardropPinShell: {
-        width: 38,
-        height: 38,
-        borderRadius: 19,
-        backgroundColor: '#ffffff',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 7,
-    },
-    teardropInnerCircle: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: '#ef4444',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    teardropPointerTip: {
-        width: 0,
-        height: 0,
-        backgroundColor: 'transparent',
-        borderStyle: 'solid',
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderTopWidth: 8,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderTopColor: '#ffffff',
-        marginTop: -3,
-    },
-
     // Map Pin Highlight Badge
     mapHighlightBadge: {
         backgroundColor: '#ffffff',
@@ -1652,7 +1578,7 @@ const styles = StyleSheet.create({
     mapHighlightSub: {
         fontSize: 10,
         fontWeight: '600',
-        color: '#059669',
+        color: '#76C815',
     },
 
     // Slot Booking Bottom Sheet Styles
@@ -1697,7 +1623,7 @@ const styles = StyleSheet.create({
     bookingBrandName: {
         fontSize: 12,
         fontWeight: '700',
-        color: '#10b981',
+        color: '#76C815',
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
@@ -1705,7 +1631,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        backgroundColor: '#ecfdf5',
+        backgroundColor: '#F0F9ED',
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 10,
@@ -1713,7 +1639,7 @@ const styles = StyleSheet.create({
     availText: {
         fontSize: 11,
         fontWeight: '600',
-        color: '#059669',
+        color: '#76C815',
     },
     bookingStationTitle: {
         fontSize: 20,
@@ -1742,17 +1668,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        backgroundColor: '#f0fdf4',
+        backgroundColor: '#F4FBF4',
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#bbf7d0',
+        borderColor: '#D4EFC3',
     },
     specChipText: {
         fontSize: 11,
         fontWeight: '700',
-        color: '#047857',
+        color: '#76C815',
     },
     sectionBlock: {
         marginBottom: 14,
@@ -1779,8 +1705,8 @@ const styles = StyleSheet.create({
         borderColor: '#cbd5e1',
     },
     connectorChipActive: {
-        backgroundColor: '#10b981',
-        borderColor: '#10b981',
+        backgroundColor: '#76C815',
+        borderColor: '#76C815',
     },
     connectorChipText: {
         fontSize: 12,
@@ -1832,8 +1758,8 @@ const styles = StyleSheet.create({
         width: '48%',
     },
     slotCardActive: {
-        backgroundColor: '#10b981',
-        borderColor: '#10b981',
+        backgroundColor: '#76C815',
+        borderColor: '#76C815',
     },
     slotCardText: {
         fontSize: 11,
@@ -1857,8 +1783,8 @@ const styles = StyleSheet.create({
         borderColor: '#cbd5e1',
     },
     durationChipActive: {
-        backgroundColor: '#10b981',
-        borderColor: '#10b981',
+        backgroundColor: '#76C815',
+        borderColor: '#76C815',
     },
     durationChipText: {
         fontSize: 12,
@@ -1888,7 +1814,7 @@ const styles = StyleSheet.create({
     totalAmountText: {
         fontSize: 22,
         fontWeight: '900',
-        color: '#10b981',
+        color: '#76C815',
     },
     payRazorpayBtn: {
         borderRadius: 14,
@@ -1954,7 +1880,7 @@ const styles = StyleSheet.create({
         width: 84,
         height: 84,
         borderRadius: 42,
-        backgroundColor: '#ecfdf5',
+        backgroundColor: '#F0F9ED',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 16,
@@ -1965,7 +1891,7 @@ const styles = StyleSheet.create({
         borderRadius: 32,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#10b981',
+        shadowColor: '#76C815',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.4,
         shadowRadius: 10,
@@ -2020,7 +1946,7 @@ const styles = StyleSheet.create({
     detailAmountPaid: {
         fontSize: 16,
         fontWeight: '900',
-        color: '#10b981',
+        color: '#76C815',
     },
     doneBtn: {
         width: '100%',

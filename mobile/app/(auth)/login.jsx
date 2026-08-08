@@ -14,8 +14,123 @@ import {
     ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import Feather from '@expo/vector-icons/Feather';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../context/AuthContext.jsx';
+import Svg, { Path, Circle } from 'react-native-svg';
+
+// Custom SVG Icons
+const MailIcon = ({ size = 20, color = '#94A3B8' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+        <Path 
+            d="M22 6L12 13L2 6" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+const LockIcon = ({ size = 20, color = '#94A3B8' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M19 11H5C3.89543 11 3 11.8954 3 13V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V13C21 11.8954 20.1046 11 19 11Z" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+        <Path 
+            d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+        <Circle cx="12" cy="16" r="2" fill={color} />
+        <Path d="M12 18V20" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+);
+
+const EyeIcon = ({ size = 20, color = '#64748B' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+        <Circle cx="12" cy="12" r="3" fill={color} />
+    </Svg>
+);
+
+const EyeOffIcon = ({ size = 20, color = '#64748B' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M17.94 17.94C16.2306 19.243 14.1491 19.9649 12 20C5 20 1 12 1 12C2.24389 9.68189 3.96914 7.6566 6.06 6.06M9.9 4.24C10.5883 4.07888 11.2931 3.99834 12 4C19 4 23 12 23 12C22.393 13.1356 21.6691 14.1947 20.84 15.16M14.12 14.12C13.8454 14.4147 13.5141 14.6512 13.1462 14.8151C12.7782 14.9791 12.3809 15.0673 11.9781 15.0744C11.5753 15.0815 11.1752 15.0074 10.8016 14.8565C10.4281 14.7056 10.0887 14.481 9.80385 14.1962C9.519 13.9113 9.29439 13.5719 9.14351 13.1984C8.99262 12.8248 8.91853 12.4247 8.92563 12.0219C8.93274 11.6191 9.02091 11.2218 9.18488 10.8538C9.34884 10.4859 9.58525 10.1546 9.88 9.88M1 1L23 23" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+const ArrowLeftIcon = ({ size = 18, color = '#1E293B' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M19 12H5M5 12L12 19M5 12L12 5" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+const ArrowRightIcon = ({ size = 18, color = '#FFFFFF' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M5 12H19M19 12L12 5M19 12L12 19" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+const LightningIcon = ({ size = 28, color = '#4CAF50' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M13 2L4 14H12L11 22L20 10H12L13 2Z" 
+            fill={color} 
+            stroke={color} 
+            strokeWidth="1.5" 
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+const CheckIcon = ({ size = 12, color = '#4CAF50' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path 
+            d="M20 6L9 17L4 12" 
+            stroke={color} 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -31,11 +146,11 @@ export default function LoginScreen() {
 
     const shake = () => {
         Animated.sequence([
-            Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
-            Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
-            Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
-            Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
-            Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 5, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: -5, duration: 50, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
         ]).start();
     };
 
@@ -43,13 +158,15 @@ export default function LoginScreen() {
         const newErrors = {};
 
         if (!email.trim()) {
-            newErrors.email = 'Email is required';
+            newErrors.email = 'Email required';
         } else if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-            newErrors.email = 'Enter a valid email address';
+            newErrors.email = 'Invalid email';
         }
 
         if (!password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = 'Password required';
+        } else if (password.length < 6) {
+            newErrors.password = 'Min 6 characters';
         }
 
         setErrors(newErrors);
@@ -90,39 +207,52 @@ export default function LoginScreen() {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <StatusBar barStyle="dark-content" backgroundColor="#F4FBF4" />
+            <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* Back Button & Header */}
+                {/* Background Elements */}
+                <View style={styles.bgGradient1} />
+                <View style={styles.bgGradient2} />
+
+                {/* Back Button */}
                 <View style={styles.topHeader}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.7}>
-                        <Feather name="arrow-left" size={20} color="#1E293B" />
+                        <ArrowLeftIcon size={18} color="#1E293B" />
                     </TouchableOpacity>
                 </View>
 
-                {/* Brand Logo & Welcome Title */}
+                {/* Brand Section - Compact */}
                 <View style={styles.brandContainer}>
-                    <View style={styles.logoBadge}>
-                        <Feather name="zap" size={32} color="#76C815" />
+                    <LinearGradient
+                        colors={['#4CAF50', '#43A047']}
+                        style={styles.logoGradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                    >
+                        <LightningIcon size={28} color="#FFFFFF" />
+                    </LinearGradient>
+                    <Text style={styles.brandTitle}>Electrically</Text>
+                    <View style={styles.brandBadge}>
+                        <Text style={styles.brandBadgeText}>Welcome Back</Text>
                     </View>
-                    <Text style={styles.brandTitle}>osler<Text style={{ color: '#76C815' }}>.ev</Text></Text>
-                    <Text style={styles.subHeading}>Sign In to access all-in-one EV charging</Text>
+                    <Text style={styles.subHeading}>
+                        Sign in to access EV charging
+                    </Text>
                 </View>
 
-                {/* Form Inputs */}
+                {/* Form - Compact */}
                 <Animated.View style={[styles.form, { transform: [{ translateX: shakeAnim }] }]}>
                     {/* Email Input */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.fieldLabel}>Email Address</Text>
                         <View style={[styles.inputBox, errors.email && styles.inputBoxError]}>
-                            <Feather name="mail" size={18} color="#94A3B8" style={styles.inputLeftIcon} />
+                            <MailIcon size={18} color={errors.email ? '#EF4444' : '#94A3B8'} />
                             <TextInput
                                 style={styles.inputField}
-                                placeholder="Enter your email address..."
+                                placeholder="Email address"
                                 placeholderTextColor="#94A3B8"
                                 value={email}
                                 onChangeText={(value) => {
@@ -139,12 +269,11 @@ export default function LoginScreen() {
 
                     {/* Password Input */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.fieldLabel}>Password</Text>
                         <View style={[styles.inputBox, errors.password && styles.inputBoxError]}>
-                            <Feather name="lock" size={18} color="#94A3B8" style={styles.inputLeftIcon} />
+                            <LockIcon size={18} color={errors.password ? '#EF4444' : '#94A3B8'} />
                             <TextInput
                                 style={styles.inputField}
-                                placeholder="••••••••••••"
+                                placeholder="Password"
                                 placeholderTextColor="#94A3B8"
                                 value={password}
                                 onChangeText={(value) => {
@@ -159,45 +288,48 @@ export default function LoginScreen() {
                                 onPress={() => setShowPassword(!showPassword)}
                                 style={styles.eyeToggle}
                             >
-                                <Feather name={showPassword ? 'eye-off' : 'eye'} size={18} color="#64748B" />
+                                {showPassword ? (
+                                    <EyeOffIcon size={18} color="#64748B" />
+                                ) : (
+                                    <EyeIcon size={18} color="#64748B" />
+                                )}
                             </TouchableOpacity>
                         </View>
                         {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
                     </View>
 
-                    {/* Forgot Password Link */}
-                    <TouchableOpacity style={styles.forgotPassButton} activeOpacity={0.7}>
-                        <Text style={styles.forgotPassText}>Forgot Password?</Text>
-                    </TouchableOpacity>
-
-                    {/* Sign In Pill Button */}
+                    {/* Sign In Button - Compact */}
                     <TouchableOpacity
-                        style={[styles.signInPillButton, isSubmitting && styles.buttonDisabled]}
+                        style={[styles.signInButton, isSubmitting && styles.buttonDisabled]}
                         onPress={handleLogin}
                         disabled={isSubmitting}
                         activeOpacity={0.88}
                     >
-                        {isSubmitting ? (
-                            <ActivityIndicator color="#FFFFFF" size="small" />
-                        ) : (
-                            <>
-                                <Text style={styles.signInButtonText}>Sign In</Text>
-                                <View style={styles.arrowIconContainer}>
-                                    <Feather name="arrow-right" size={18} color="#FFFFFF" />
-                                </View>
-                            </>
-                        )}
+                        <LinearGradient
+                            colors={['#4CAF50', '#43A047']}
+                            style={styles.signInGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            {isSubmitting ? (
+                                <ActivityIndicator color="#FFFFFF" size="small" />
+                            ) : (
+                                <>
+                                    <Text style={styles.signInButtonText}>Sign In</Text>
+                                    <ArrowRightIcon size={18} color="#FFFFFF" />
+                                </>
+                            )}
+                        </LinearGradient>
                     </TouchableOpacity>
 
-                    {/* Register Redirection Link */}
+                    {/* Sign Up Link - Compact */}
                     <TouchableOpacity
                         onPress={() => router.replace('/(auth)/register')}
-                        style={styles.switchAuthContainer}
+                        style={styles.signUpContainer}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.switchAuthText}>
-                            {"Don't have an account?"}{' '}
-                            <Text style={styles.switchAuthHighlight}>Sign Up</Text>
+                        <Text style={styles.signUpText}>
+                            New here? <Text style={styles.signUpHighlight}>Create Account</Text>
                         </Text>
                     </TouchableOpacity>
                 </Animated.View>
@@ -209,28 +341,45 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F4FBF4',
+        backgroundColor: '#F8FAFC',
     },
     scrollContent: {
         flexGrow: 1,
-        paddingHorizontal: 24,
-        paddingTop: 56,
-        paddingBottom: 40,
-        justifyContent: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 40,
+        paddingBottom: 20,
+    },
+    bgGradient1: {
+        position: 'absolute',
+        top: -80,
+        right: -50,
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        backgroundColor: 'rgba(76, 175, 80, 0.05)',
+    },
+    bgGradient2: {
+        position: 'absolute',
+        bottom: -50,
+        left: -50,
+        width: 180,
+        height: 180,
+        borderRadius: 90,
+        backgroundColor: 'rgba(123, 97, 255, 0.04)',
     },
     topHeader: {
-        marginBottom: 20,
+        marginBottom: 8,
     },
     backButton: {
-        width: 42,
-        height: 42,
-        borderRadius: 21,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#E6F4E2',
-        shadowColor: '#102A00',
+        borderColor: '#E8EDF2',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.04,
         shadowRadius: 6,
@@ -238,139 +387,146 @@ const styles = StyleSheet.create({
     },
     brandContainer: {
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 16,
     },
-    logoBadge: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        backgroundColor: '#FFFFFF',
+    logoGradient: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: '#E6F4E2',
-        shadowColor: '#76C815',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.12,
+        shadowColor: '#4CAF50',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 4,
-        marginBottom: 12,
+        marginBottom: 6,
     },
     brandTitle: {
-        fontSize: 28,
+        fontSize: 22,
         fontWeight: '900',
-        color: '#1E293B',
+        color: '#1A2332',
         letterSpacing: -0.5,
     },
+    brandBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        marginTop: 3,
+        backgroundColor: '#E8F5E9',
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        borderRadius: 10,
+    },
+    brandBadgeText: {
+        fontSize: 10,
+        fontWeight: '600',
+        color: '#4CAF50',
+        letterSpacing: 0.3,
+    },
     subHeading: {
-        fontSize: 14,
+        fontSize: 13,
         color: '#64748B',
-        marginTop: 6,
+        marginTop: 4,
         textAlign: 'center',
+        fontWeight: '400',
     },
     form: {
-        gap: 18,
+        gap: 10,
+        backgroundColor: '#FFFFFF',
+        padding: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#E8EDF2',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+        elevation: 3,
     },
     inputGroup: {
-        gap: 6,
-    },
-    fieldLabel: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#334155',
-        marginLeft: 4,
+        gap: 3,
     },
     inputBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 18,
+        backgroundColor: '#F8FAFC',
+        borderRadius: 12,
         borderWidth: 1.5,
-        borderColor: '#E2EFE0',
-        paddingHorizontal: 16,
-        height: 56,
-        shadowColor: '#102A00',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.03,
-        shadowRadius: 6,
-        elevation: 1,
+        borderColor: '#E2E8F0',
+        paddingHorizontal: 12,
+        height: 42,
     },
     inputBoxError: {
         borderColor: '#EF4444',
         backgroundColor: '#FEF2F2',
     },
-    inputLeftIcon: {
-        marginRight: 12,
-    },
     inputField: {
         flex: 1,
-        fontSize: 15,
-        color: '#1E293B',
+        fontSize: 14,
+        color: '#1A2332',
         fontWeight: '500',
+        paddingVertical: 6,
+        paddingHorizontal: 8,
     },
     eyeToggle: {
-        padding: 8,
+        padding: 4,
+        marginRight: -4,
     },
     errorText: {
-        fontSize: 12,
+        fontSize: 11,
         color: '#EF4444',
         marginLeft: 6,
         fontWeight: '500',
     },
     forgotPassButton: {
         alignSelf: 'flex-end',
-        marginTop: -4,
-        paddingVertical: 4,
+        paddingVertical: 2,
         paddingHorizontal: 4,
     },
     forgotPassText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '700',
-        color: '#76C815',
+        color: '#4CAF50',
     },
-    signInPillButton: {
-        backgroundColor: '#76C815',
-        height: 56,
-        borderRadius: 28,
+    signInButton: {
+        height: 44,
+        borderRadius: 22,
+        overflow: 'hidden',
+        marginTop: 4,
+        shadowColor: '#4CAF50',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 5,
+    },
+    signInGradient: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 10,
-        shadowColor: '#76C815',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.35,
-        shadowRadius: 14,
-        elevation: 8,
+        gap: 6,
     },
     buttonDisabled: {
         opacity: 0.7,
     },
     signInButtonText: {
-        fontSize: 17,
+        fontSize: 15,
         fontWeight: '700',
         color: '#FFFFFF',
-        marginRight: 8,
+        letterSpacing: 0.3,
     },
-    arrowIconContainer: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: 'rgba(255, 255, 255, 0.25)',
-        justifyContent: 'center',
+    signUpContainer: {
         alignItems: 'center',
+        paddingVertical: 8,
     },
-    switchAuthContainer: {
-        alignItems: 'center',
-        paddingVertical: 14,
-    },
-    switchAuthText: {
-        fontSize: 14,
+    signUpText: {
+        fontSize: 13,
         color: '#64748B',
         fontWeight: '500',
     },
-    switchAuthHighlight: {
-        color: '#76C815',
+    signUpHighlight: {
+        color: '#4CAF50',
         fontWeight: '700',
-        textDecorationLine: 'underline',
     },
 });

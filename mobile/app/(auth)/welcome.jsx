@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, StatusBar, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -158,15 +158,20 @@ export default function WelcomeScreen() {
             <View style={styles.floatingDot3} />
             <View style={styles.floatingDot4} />
 
-            <Animated.View
-                style={[
-                    styles.content,
-                    {
-                        opacity: fadeAnim,
-                        transform: [{ translateY: slideAnim }],
-                    },
-                ]}
+            <ScrollView 
+                contentContainerStyle={styles.scrollContent} 
+                showsVerticalScrollIndicator={false}
+                bounces={true}
             >
+                <Animated.View
+                    style={[
+                        styles.content,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ translateY: slideAnim }],
+                        },
+                    ]}
+                >
                 {/* Logo Section */}
                 <Animated.View style={[styles.logoSection, { transform: [{ scale: scaleAnim }] }]}>
                     <View style={styles.logoWrapper}>
@@ -300,6 +305,7 @@ export default function WelcomeScreen() {
                     </View>
                 </TouchableOpacity>
             </Animated.View>
+            </ScrollView>
         </View>
     );
 }
@@ -308,6 +314,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8FAFC',
+    },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'space-between',
+        paddingBottom: 24,
     },
     bgGradient1: {
         position: 'absolute',

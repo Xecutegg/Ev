@@ -46,8 +46,22 @@ const stationSchema = new mongoose.Schema(
         },
         chargerLevel: {
             type: String,
-            enum: ['Level 2', 'DC Fast Charger', 'Level 3'],
-            default: 'Level 2',
+            trim: true,
+            enum: [
+                'Level 1 (Slow AC)',
+                'Level 2 (Faster AC)',
+                'DC Fast Charger (Super-fast DC)',
+                'DC Fast Charger (Super-Fast DC)',
+                'DC Fast Charger (Super fast DC)',
+                'Level 1',
+                'Level 2',
+                'DC Fast',
+                'DC Fast Charger',
+                'Level 3',
+                'Super-fast DC',
+                'Super Fast DC',
+            ],
+            default: 'Level 2 (Faster AC)',
         },
         powerOutput: {
             type: String,
@@ -74,7 +88,7 @@ const stationSchema = new mongoose.Schema(
         },
         pricingType: {
             type: String,
-            enum: ['per_kwh', 'per_hour', 'per_min', 'free'],
+            enum: ['per_kwh', 'per_hour', 'free'],
             default: 'per_kwh',
         },
         priceRate: {

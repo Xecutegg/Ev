@@ -63,7 +63,7 @@ const createStation = asyncHandler(async (req, res) => {
             coordinates: [lngNum, latNum], // GeoJSON order: [longitude, latitude]
         },
         locationType: locationType || 'Suburban',
-        chargerLevel: chargerLevel || 'Level 2',
+        chargerLevel: chargerLevel || 'Level 2 (Faster AC)',
         powerOutput: powerOutput || '7.2 kW',
         totalPorts: portsNum,
         availablePorts: availNum,

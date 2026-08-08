@@ -21,7 +21,7 @@ export default function TabsLayout() {
             <Tabs.Screen
                 name="home"
                 options={{
-                    title: 'Map & Charging',
+                    title: 'Finder',
                     tabBarIcon: ({ color, focused }) => (
                         <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
                             <Feather name="map-pin" size={20} color={focused ? '#76C815' : color} />
@@ -32,10 +32,10 @@ export default function TabsLayout() {
             <Tabs.Screen
                 name="booking-history"
                 options={{
-                    title: 'My Bookings',
+                    title: 'History',
                     tabBarIcon: ({ color, focused }) => (
                         <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-                            <Feather name="clock" size={20} color={focused ? '#76C815' : color} />
+                            <Feather name="briefcase" size={20} color={focused ? '#17e2a5ff' : color} />
                         </View>
                     ),
                 }}

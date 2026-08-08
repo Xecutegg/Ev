@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+// Updated Station schema enums
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';

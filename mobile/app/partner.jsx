@@ -15,13 +15,35 @@ import {
     Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import stationService from '../services/station.service.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import {
+    ArrowLeft,
+    Plus,
+    MapPin,
+    Lock,
+    Unlock,
+    Search,
+    X,
+    Zap,
+    Shield,
+    Sparkles,
+    Check,
+    Clock,
+    Calendar,
+    DollarSign,
+    Map,
+    Locate,
+    Trash2,
+    Edit,
+    GripVertical,
+    Power,
+    HardDrive,
+    Tag,
+} from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -32,89 +54,29 @@ try {
     MapView = Maps.default || Maps;
     Marker = Maps.Marker;
     PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
-} catch (_e) {}
+} catch (_e) { }
 
 try {
     const Web = require('react-native-webview');
     WebView = Web.WebView || Web.default || Web;
-} catch (_e) {}
+} catch (_e) { }
 
 const CLEAN_MAP_STYLE = [
-    {
-        featureType: 'all',
-        elementType: 'labels.icon',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels.icon',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels.text',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.school',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.government',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.medical',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.park',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.place_of_worship',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.attraction',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.business',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'transit',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'administrative',
-        elementType: 'labels',
-        stylers: [{ visibility: 'on' }],
-    },
-    {
-        featureType: 'road',
-        elementType: 'labels',
-        stylers: [{ visibility: 'on' }],
-    },
+    { featureType: 'all', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.school', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.government', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.medical', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.park', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.place_of_worship', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.attraction', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.business', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative', elementType: 'labels', stylers: [{ visibility: 'on' }] },
+    { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'on' }] },
 ];
 
 export default function PartnerScreen() {
@@ -131,7 +93,6 @@ export default function PartnerScreen() {
     const slideAnim = useRef(new Animated.Value(30)).current;
     const modalSlideAnim = useRef(new Animated.Value(height)).current;
     const mapModalSlideAnim = useRef(new Animated.Value(height)).current;
-    const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
     // Interactive Map Location Picker State
     const [showMapPickerModal, setShowMapPickerModal] = useState(false);
@@ -154,7 +115,7 @@ export default function PartnerScreen() {
         longitude: '',
         addressSearch: '',
         locationType: 'Suburban',
-        chargerLevel: 'Level 2',
+        chargerLevel: 'Level 2 (Faster AC)',
         powerOutput: '7.2 kW',
         totalPorts: '4',
         availablePorts: '4',
@@ -188,12 +149,6 @@ export default function PartnerScreen() {
             Animated.timing(slideAnim, {
                 toValue: 0,
                 duration: 600,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 8,
-                tension: 40,
                 useNativeDriver: true,
             }),
         ]).start();
@@ -266,7 +221,7 @@ export default function PartnerScreen() {
                                 };
                             }
                         }
-                    } catch (_lk) {}
+                    } catch (_lk) { }
 
                     try {
                         const pos = await Location.getCurrentPositionAsync({
@@ -278,7 +233,7 @@ export default function PartnerScreen() {
                                 longitude: pos.coords.longitude,
                             };
                         }
-                    } catch (_cur) {}
+                    } catch (_cur) { }
                 }
             }
 
@@ -291,7 +246,7 @@ export default function PartnerScreen() {
                     );
                 });
             }
-        } catch (_e) {}
+        } catch (_e) { }
         return null;
     };
 
@@ -316,10 +271,10 @@ export default function PartnerScreen() {
                         const formatted = [place.city || place.subregion, place.region].filter(Boolean).join(', ');
                         setForm((prev) => ({ ...prev, cityState: formatted || 'Current Location' }));
                     }
-                } catch (_gErr) {}
-                Alert.alert('📍 Location Found', `Lat: ${latStr}, Lng: ${lngStr}`);
+                } catch (_gErr) { }
+                Alert.alert('Location Found', `Lat: ${latStr}, Lng: ${lngStr}`);
             } else {
-                Alert.alert('⚠️ Notice', 'Could not access live GPS position.');
+                Alert.alert('Notice', 'Could not access live GPS position.');
             }
         } catch (_err) {
             Alert.alert('Error', 'Could not fetch current location.');
@@ -388,7 +343,7 @@ export default function PartnerScreen() {
                     return;
                 }
             }
-        } catch (_e) {}
+        } catch (_e) { }
         setPinAddress(`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`);
     };
 
@@ -416,7 +371,7 @@ export default function PartnerScreen() {
                         fetchReverseGeocode(newLat, newLng);
                     }
                 })
-                .catch(() => {})
+                .catch(() => { })
                 .finally(() => setIsSearchingModal(false));
         } else if (!form.latitude || !form.longitude) {
             fetchFastLiveLocation().then((fastPos) => {
@@ -468,7 +423,7 @@ export default function PartnerScreen() {
             address: pinAddress || prev.address,
         }));
         hideMapPicker();
-        Alert.alert('📍 Location Locked!', `Station position set to:\nLat: ${latStr}, Lng: ${lngStr}`);
+        Alert.alert('Location Locked!', `Station position set to:\nLat: ${latStr}, Lng: ${lngStr}`);
     };
 
     const handleUnlockLocation = () => {
@@ -482,18 +437,6 @@ export default function PartnerScreen() {
     };
 
     const isLocationLocked = Boolean(form.latitude && form.longitude);
-
-    const toggleAmenity = (amenity) => {
-        setForm((prev) => {
-            const exists = prev.amenities.includes(amenity);
-            return {
-                ...prev,
-                amenities: exists
-                    ? prev.amenities.filter((a) => a !== amenity)
-                    : [...prev.amenities, amenity],
-            };
-        });
-    };
 
     const toggleConnector = (conn) => {
         setForm((prev) => {
@@ -518,7 +461,7 @@ export default function PartnerScreen() {
             longitude: st.location?.coordinates?.[0]?.toString() || '',
             addressSearch: st.cityState || '',
             locationType: st.locationType || 'Suburban',
-            chargerLevel: st.chargerLevel || 'Level 2',
+            chargerLevel: st.chargerLevel || 'Level 2 (Faster AC)',
             powerOutput: st.powerOutput || '7.2 kW',
             totalPorts: st.totalPorts?.toString() || '4',
             availablePorts: st.availablePorts?.toString() || '4',
@@ -555,7 +498,7 @@ export default function PartnerScreen() {
             if (editingStationId) {
                 const res = await stationService.updateStation(editingStationId, form);
                 if (res.success) {
-                    Alert.alert('✅ Success', 'Charging station updated successfully!');
+                    Alert.alert('Success', 'Charging station updated successfully!');
                     hideFormModal();
                     fetchMyStations();
                 }
@@ -566,7 +509,7 @@ export default function PartnerScreen() {
                         updateUser(res.data.user);
                     }
                     Alert.alert(
-                        '🎉 Station Listed!',
+                        'Station Listed!',
                         `"${form.stationName.trim()}" is now live!`
                     );
                     hideFormModal();
@@ -591,7 +534,7 @@ export default function PartnerScreen() {
                     try {
                         const res = await stationService.deleteStation(id);
                         if (res.success) {
-                            Alert.alert('✅ Deleted', 'Station removed successfully.');
+                            Alert.alert('Deleted', 'Station removed successfully.');
                             fetchMyStations();
                         }
                     } catch (err) {
@@ -603,8 +546,8 @@ export default function PartnerScreen() {
     };
 
     const renderStationCard = (st) => (
-        <Animated.View 
-            key={st._id} 
+        <Animated.View
+            key={st._id}
             style={[
                 styles.stationItemCard,
                 {
@@ -632,17 +575,17 @@ export default function PartnerScreen() {
 
             <View style={styles.stationMetaRow}>
                 <View style={styles.metaChip}>
-                    <Ionicons name="flash-outline" size={14} color="#76C815" />
+                    <Power size={14} color="#4CAF50" />
                     <Text style={styles.metaValue}>{st.powerOutput}</Text>
                 </View>
                 <View style={styles.metaChip}>
-                    <Ionicons name="hardware-chip-outline" size={14} color="#76C815" />
+                    <HardDrive size={14} color="#4CAF50" />
                     <Text style={styles.metaValue}>{st.totalPorts} Ports</Text>
                 </View>
                 <View style={styles.metaChip}>
-                    <Ionicons name="pricetag-outline" size={14} color="#76C815" />
-                    <Text style={[styles.metaValue, { color: '#76C815', fontWeight: '800' }]}>
-                        ₹{st.priceRate} / {st.pricingType === 'per_kwh' ? 'kWh' : st.pricingType === 'per_hour' ? 'hr' : 'min'}
+                    <Tag size={14} color="#4CAF50" />
+                    <Text style={[styles.metaValue, { color: '#4CAF50', fontWeight: '800' }]}>
+                        ₹{st.priceRate} / {st.pricingType === 'per_kwh' ? 'kWh' : 'hr'}
                     </Text>
                 </View>
             </View>
@@ -654,10 +597,10 @@ export default function PartnerScreen() {
                     activeOpacity={0.8}
                 >
                     <LinearGradient
-                        colors={['#F0F9ED', '#E2F5D6']}
+                        colors={['#E8F5E9', '#C8E6C9']}
                         style={styles.editGradient}
                     >
-                        <Ionicons name="create-outline" size={16} color="#76C815" />
+                        <Edit size={16} color="#4CAF50" />
                         <Text style={styles.editButtonText}>Edit</Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -667,7 +610,7 @@ export default function PartnerScreen() {
                     onPress={() => handleDeleteStation(st._id, st.stationName)}
                     activeOpacity={0.8}
                 >
-                    <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                    <Trash2 size={20} color="#ef4444" />
                 </TouchableOpacity>
             </View>
         </Animated.View>
@@ -680,7 +623,7 @@ export default function PartnerScreen() {
             {/* Header */}
             <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.8}>
-                    <Ionicons name="arrow-back" size={22} color="#0f172a" />
+                    <ArrowLeft size={22} color="#0f172a" />
                 </TouchableOpacity>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={styles.headerTitle}>Partner Portal</Text>
@@ -691,10 +634,10 @@ export default function PartnerScreen() {
                 {myStations.length > 0 && (
                     <TouchableOpacity style={styles.addNavButton} onPress={openNewStationForm} activeOpacity={0.8}>
                         <LinearGradient
-                            colors={['#10b981', '#059669']}
+                            colors={['#4CAF50', '#388E3C']}
                             style={styles.addNavGradient}
                         >
-                            <Ionicons name="add" size={18} color="#ffffff" />
+                            <Plus size={18} color="#ffffff" />
                             <Text style={styles.addNavButtonText}>Add New</Text>
                         </LinearGradient>
                     </TouchableOpacity>
@@ -704,15 +647,18 @@ export default function PartnerScreen() {
             {/* Main Content */}
             {isLoadingStations ? (
                 <View style={styles.centerLoading}>
-                    <ActivityIndicator size="large" color="#10b981" />
+                    <ActivityIndicator size="large" color="#4CAF50" />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
                     {/* Partner Info Card */}
                     {(() => {
                         const isPartnerVerified = (user?.role === 'partner') || (myStations && myStations.length > 0);
                         return (
-                            <Animated.View 
+                            <Animated.View
                                 style={[
                                     styles.partnerInfoCard,
                                     isPartnerVerified && styles.verifiedPartnerCard,
@@ -723,16 +669,16 @@ export default function PartnerScreen() {
                                 ]}
                             >
                                 <LinearGradient
-                                    colors={isPartnerVerified ? ['#059669', '#10b981', '#34d399'] : ['#3b82f6', '#1d4ed8']}
+                                    colors={isPartnerVerified ? ['#4CAF50', '#388E3C'] : ['#2196F3', '#1565C0']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}
                                     style={styles.partnerInfoIcon}
                                 >
-                                    <Ionicons 
-                                        name={isPartnerVerified ? "shield-checkmark" : "sparkles"} 
-                                        size={26} 
-                                        color="#ffffff" 
-                                    />
+                                    {isPartnerVerified ? (
+                                        <Shield size={26} color="#ffffff" />
+                                    ) : (
+                                        <Sparkles size={26} color="#ffffff" />
+                                    )}
                                 </LinearGradient>
                                 <View style={{ flex: 1 }}>
                                     <View style={styles.verifiedHeaderRow}>
@@ -741,13 +687,13 @@ export default function PartnerScreen() {
                                         </Text>
                                         {isPartnerVerified && (
                                             <View style={styles.verifiedChip}>
-                                                <Ionicons name="checkmark-circle" size={13} color="#059669" />
+                                                <Check size={12} color="#4CAF50" />
                                                 <Text style={styles.verifiedChipText}>Verified</Text>
                                             </View>
                                         )}
                                     </View>
                                     <Text style={styles.partnerInfoSubtitle}>
-                                        {isPartnerVerified 
+                                        {isPartnerVerified
                                             ? `${myStations.length} Station${myStations.length !== 1 ? 's' : ''} Listed & Active`
                                             : 'List your EV charging station to start earning'
                                         }
@@ -763,7 +709,7 @@ export default function PartnerScreen() {
                     })()}
 
                     {/* Stations Section */}
-                    <Animated.View 
+                    <Animated.View
                         style={[
                             styles.sectionCard,
                             {
@@ -779,7 +725,7 @@ export default function PartnerScreen() {
                         {myStations.length === 0 ? (
                             <View style={styles.emptyCard}>
                                 <View style={styles.emptyIconContainer}>
-                                    <Ionicons name="flash-outline" size={56} color="#cbd5e1" />
+                                    <Zap size={48} color="#cbd5e1" />
                                 </View>
                                 <Text style={styles.emptyTitle}>No Stations Yet</Text>
                                 <Text style={styles.emptySub}>
@@ -787,10 +733,10 @@ export default function PartnerScreen() {
                                 </Text>
                                 <TouchableOpacity style={styles.emptyAddButton} onPress={openNewStationForm} activeOpacity={0.8}>
                                     <LinearGradient
-                                        colors={['#10b981', '#059669']}
+                                        colors={['#4CAF50', '#388E3C']}
                                         style={styles.emptyAddGradient}
                                     >
-                                        <Ionicons name="add" size={20} color="#ffffff" />
+                                        <Plus size={20} color="#ffffff" />
                                         <Text style={styles.emptyAddButtonText}>List Your First Station</Text>
                                     </LinearGradient>
                                 </TouchableOpacity>
@@ -802,41 +748,43 @@ export default function PartnerScreen() {
                 </ScrollView>
             )}
 
-            {/* Form Modal */}
+            {/* Form Modal - Simplified */}
             <Modal
                 visible={showFormModal}
                 transparent={true}
                 animationType="none"
                 onRequestClose={hideFormModal}
             >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={hideFormModal}
-                >
-                    <Animated.View 
+                <View style={styles.modalOverlay}>
+                    <TouchableOpacity
+                        style={StyleSheet.absoluteFillObject}
+                        activeOpacity={1}
+                        onPress={hideFormModal}
+                    />
+                    <Animated.View
                         style={[
                             styles.modalContainer,
                             { transform: [{ translateY: modalSlideAnim }] }
                         ]}
-                        onStartShouldSetResponder={() => true}
                     >
                         <View style={styles.modalHandle} />
-                        
+
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>
-                                {editingStationId ? '✏️ Edit Station' : '📋 New Station'}
+                                {editingStationId ? 'Edit Station' : 'New Station'}
                             </Text>
                             <TouchableOpacity onPress={hideFormModal} style={styles.closeButton} activeOpacity={0.7}>
-                                <Ionicons name="close" size={24} color="#64748b" />
+                                <X size={24} color="#64748b" />
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView showsVerticalScrollIndicator={false}>
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                        >
                             {/* Station Information */}
                             <View style={styles.formSection}>
                                 <Text style={styles.sectionTitle}>Station Details</Text>
-                                
+
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.label}>Station Name *</Text>
                                     <TextInput
@@ -860,13 +808,13 @@ export default function PartnerScreen() {
                                 </View>
                             </View>
 
-                            {/* Location */}
+                            {/* Location - Simplified */}
                             <View style={styles.formSection}>
                                 <View style={styles.sectionTitleRow}>
-                                    <Text style={styles.sectionTitle}>📍 Location</Text>
+                                    <Text style={styles.sectionTitle}>Location</Text>
                                     {isLocationLocked && (
                                         <View style={styles.lockedBadge}>
-                                            <Ionicons name="lock-closed" size={12} color="#059669" />
+                                            <Lock size={12} color="#4CAF50" />
                                             <Text style={styles.lockedBadgeText}>Locked</Text>
                                         </View>
                                     )}
@@ -877,7 +825,7 @@ export default function PartnerScreen() {
                                     <View style={styles.searchRow}>
                                         <TextInput
                                             style={[styles.input, { flex: 1 }, isLocationLocked && styles.disabledInput]}
-                                            placeholder={isLocationLocked ? "🔒 Location locked" : "Search city or area..."}
+                                            placeholder={isLocationLocked ? "Location locked" : "Search city or area..."}
                                             placeholderTextColor="#94a3b8"
                                             value={isLocationLocked ? (form.cityState || `Lat: ${form.latitude}, Lng: ${form.longitude}`) : form.addressSearch}
                                             onChangeText={(val) => !isLocationLocked && setForm({ ...form, addressSearch: val })}
@@ -893,7 +841,7 @@ export default function PartnerScreen() {
                                             {isSearching ? (
                                                 <ActivityIndicator size="small" color="#ffffff" />
                                             ) : (
-                                                <Ionicons name={isLocationLocked ? "lock-closed" : "search"} size={20} color="#ffffff" />
+                                                <Search size={20} color="#ffffff" />
                                             )}
                                         </TouchableOpacity>
                                     </View>
@@ -903,7 +851,7 @@ export default function PartnerScreen() {
                                     <View style={styles.locationLockedCard}>
                                         <View style={styles.locationLockedHeader}>
                                             <View style={styles.locationLockedIcon}>
-                                                <Ionicons name="location" size={20} color="#059669" />
+                                                <MapPin size={20} color="#4CAF50" />
                                             </View>
                                             <View style={{ flex: 1 }}>
                                                 <Text style={styles.locationLockedTitle}>Location Confirmed</Text>
@@ -918,7 +866,7 @@ export default function PartnerScreen() {
                                                 onPress={() => openMapPicker()}
                                                 activeOpacity={0.8}
                                             >
-                                                <Ionicons name="map" size={16} color="#059669" />
+                                                <Map size={16} color="#4CAF50" />
                                                 <Text style={styles.changeMapButtonText}>Adjust Pin</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
@@ -926,7 +874,7 @@ export default function PartnerScreen() {
                                                 onPress={handleUnlockLocation}
                                                 activeOpacity={0.8}
                                             >
-                                                <Ionicons name="lock-open" size={16} color="#64748b" />
+                                                <Unlock size={16} color="#64748b" />
                                                 <Text style={styles.unlockButtonText}>Unlock</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -939,10 +887,10 @@ export default function PartnerScreen() {
                                             activeOpacity={0.85}
                                         >
                                             <LinearGradient
-                                                colors={['#10b981', '#059669']}
+                                                colors={['#4CAF50', '#388E3C']}
                                                 style={styles.mapTriggerGradient}
                                             >
-                                                <Ionicons name="map" size={20} color="#ffffff" />
+                                                <Map size={20} color="#ffffff" />
                                                 <Text style={styles.mapTriggerButtonText}>Open Map Picker</Text>
                                             </LinearGradient>
                                         </TouchableOpacity>
@@ -954,9 +902,9 @@ export default function PartnerScreen() {
                                             activeOpacity={0.8}
                                         >
                                             {isLocating ? (
-                                                <ActivityIndicator size="small" color="#10b981" />
+                                                <ActivityIndicator size="small" color="#4CAF50" />
                                             ) : (
-                                                <Ionicons name="locate" size={20} color="#10b981" />
+                                                <Locate size={20} color="#4CAF50" />
                                             )}
                                             <Text style={styles.gpsButtonText}>
                                                 {isLocating ? 'Fetching GPS...' : 'Use Current Location'}
@@ -1011,14 +959,18 @@ export default function PartnerScreen() {
                                 </View>
                             </View>
 
-                            {/* Hardware Specs */}
+                            {/* Hardware Specs - Simplified */}
                             <View style={styles.formSection}>
-                                <Text style={styles.sectionTitle}>⚡ Hardware Specs</Text>
+                                <Text style={styles.sectionTitle}>Hardware Specs</Text>
 
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.label}>Charger Level</Text>
                                     <View style={styles.chipGrid}>
-                                        {['Level 2', 'DC Fast', 'Level 3'].map((lvl) => (
+                                        {[
+                                            'Level 1 (Slow AC)',
+                                            'Level 2 (Faster AC)',
+                                            'DC Fast Charger (Super-fast DC)',
+                                        ].map((lvl) => (
                                             <TouchableOpacity
                                                 key={lvl}
                                                 style={[styles.chip, form.chargerLevel === lvl && styles.chipActive]}
@@ -1030,6 +982,27 @@ export default function PartnerScreen() {
                                                 </Text>
                                             </TouchableOpacity>
                                         ))}
+                                    </View>
+                                </View>
+
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.label}>Supported Plugs / Connectors</Text>
+                                    <View style={styles.chipGrid}>
+                                        {['CCS2', 'Type 2', 'CHAdeMO', 'GB/T'].map((conn) => {
+                                            const isSelected = form.connectors?.includes(conn);
+                                            return (
+                                                <TouchableOpacity
+                                                    key={conn}
+                                                    style={[styles.chip, isSelected && styles.chipActive]}
+                                                    onPress={() => toggleConnector(conn)}
+                                                    activeOpacity={0.7}
+                                                >
+                                                    <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>
+                                                        {isSelected ? '✓ ' : ''}{conn}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            );
+                                        })}
                                     </View>
                                 </View>
 
@@ -1076,14 +1049,13 @@ export default function PartnerScreen() {
                                 </View>
                             </View>
 
-                            {/* Pricing */}
+                            {/* Pricing - Simplified */}
                             <View style={styles.formSection}>
-                                <Text style={styles.sectionTitle}>💰 Pricing</Text>
+                                <Text style={styles.sectionTitle}>Pricing</Text>
                                 <View style={styles.chipGrid}>
                                     {[
                                         { id: 'per_kwh', label: '/ kWh' },
                                         { id: 'per_hour', label: '/ Hour' },
-                                        { id: 'per_min', label: '/ Min' },
                                         { id: 'free', label: 'Free' },
                                     ].map((model) => (
                                         <TouchableOpacity
@@ -1102,7 +1074,7 @@ export default function PartnerScreen() {
                                 {form.pricingType !== 'free' && (
                                     <View style={[styles.inputGroup, { marginTop: 12 }]}>
                                         <Text style={styles.label}>
-                                            Rate (₹{form.pricingType === 'per_kwh' ? '/kWh' : form.pricingType === 'per_hour' ? '/hr' : '/min'})
+                                            Rate (₹{form.pricingType === 'per_kwh' ? '/kWh' : '/hr'})
                                         </Text>
                                         <TextInput
                                             style={styles.input}
@@ -1116,12 +1088,12 @@ export default function PartnerScreen() {
                                 )}
                             </View>
 
-                            {/* Operating Hours & Time Slots */}
+                            {/* Operating Hours - Simplified */}
                             <View style={styles.formSection}>
-                                <Text style={styles.sectionTitle}>⏰ Operating Days & Time Slots</Text>
-                                
+                                <Text style={styles.sectionTitle}>Operating Hours</Text>
+
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.label}>Operating Schedule</Text>
+                                    <Text style={styles.label}>Schedule</Text>
                                     <View style={styles.chipGrid}>
                                         {['24/7 (Mon - Sun)', 'Mon - Sat', 'Mon - Fri'].map((days) => (
                                             <TouchableOpacity
@@ -1172,14 +1144,14 @@ export default function PartnerScreen() {
                                 activeOpacity={0.85}
                             >
                                 <LinearGradient
-                                    colors={['#10b981', '#059669']}
+                                    colors={['#4CAF50', '#388E3C']}
                                     style={styles.submitGradient}
                                 >
                                     {isSubmitting ? (
                                         <ActivityIndicator color="#ffffff" size="small" />
                                     ) : (
                                         <>
-                                            <Ionicons name="checkmark-circle" size={24} color="#ffffff" />
+                                            <Check size={24} color="#ffffff" />
                                             <Text style={styles.submitButtonText}>
                                                 {editingStationId ? 'Save Changes' : 'List Station'}
                                             </Text>
@@ -1189,34 +1161,34 @@ export default function PartnerScreen() {
                             </TouchableOpacity>
                         </ScrollView>
                     </Animated.View>
-                </TouchableOpacity>
+                </View>
             </Modal>
 
-            {/* Map Picker Modal */}
+            {/* Map Picker Modal - Simplified */}
             <Modal
                 visible={showMapPickerModal}
                 transparent={true}
                 animationType="none"
                 onRequestClose={hideMapPicker}
             >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={hideMapPicker}
-                >
-                    <Animated.View 
+                <View style={styles.modalOverlay}>
+                    <TouchableOpacity
+                        style={StyleSheet.absoluteFillObject}
+                        activeOpacity={1}
+                        onPress={hideMapPicker}
+                    />
+                    <Animated.View
                         style={[
                             styles.mapModalContainer,
                             { transform: [{ translateY: mapModalSlideAnim }] }
                         ]}
-                        onStartShouldSetResponder={() => true}
                     >
                         <View style={styles.modalHandle} />
-                        
+
                         <View style={styles.mapModalHeader}>
-                            <Text style={styles.mapModalTitle}>📍 Set Location</Text>
+                            <Text style={styles.mapModalTitle}>Set Location</Text>
                             <TouchableOpacity onPress={hideMapPicker} style={styles.closeButton} activeOpacity={0.7}>
-                                <Ionicons name="close" size={24} color="#64748b" />
+                                <X size={24} color="#64748b" />
                             </TouchableOpacity>
                         </View>
 
@@ -1239,7 +1211,7 @@ export default function PartnerScreen() {
                                     {isSearchingModal ? (
                                         <ActivityIndicator size="small" color="#ffffff" />
                                     ) : (
-                                        <Ionicons name="search" size={20} color="#ffffff" />
+                                        <Search size={20} color="#ffffff" />
                                     )}
                                 </TouchableOpacity>
                             </View>
@@ -1268,7 +1240,7 @@ export default function PartnerScreen() {
                                     />
                                     <View style={styles.centerPinOverlay} pointerEvents="none">
                                         <View style={styles.centerPinContainer}>
-                                            <Ionicons name="location" size={48} color="#10b981" />
+                                            <MapPin size={48} color="#4CAF50" />
                                             <View style={styles.centerPinDot} />
                                         </View>
                                     </View>
@@ -1304,7 +1276,7 @@ export default function PartnerScreen() {
                                             .custom-pin {
                                               width: 36px;
                                               height: 36px;
-                                              background: #10b981;
+                                              background: #4CAF50;
                                               border-radius: 50% 50% 50% 0;
                                               transform: rotate(-45deg);
                                               border: 3.5px solid #ffffff;
@@ -1371,7 +1343,7 @@ export default function PartnerScreen() {
 
                         <View style={styles.mapPickerBottomCard}>
                             <View style={styles.pinAddressContainer}>
-                                <Ionicons name="location" size={22} color="#10b981" />
+                                <MapPin size={22} color="#4CAF50" />
                                 <View style={{ flex: 1 }}>
                                     <Text style={styles.pinAddressTitle} numberOfLines={1}>
                                         {pinAddress || 'Selected Location'}
@@ -1388,669 +1360,393 @@ export default function PartnerScreen() {
                                 activeOpacity={0.85}
                             >
                                 <LinearGradient
-                                    colors={['#10b981', '#059669']}
+                                    colors={['#4CAF50', '#388E3C']}
                                     style={styles.applyLocationGradient}
                                 >
-                                    <Ionicons name="checkmark-circle" size={22} color="#ffffff" />
+                                    <Check size={22} color="#ffffff" />
                                     <Text style={styles.applyLocationButtonText}>Apply Location</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
                         </View>
                     </Animated.View>
-                </TouchableOpacity>
+                </View>
             </Modal>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f8fafc',
-    },
+    container: { flex: 1, backgroundColor: '#f8fafc' },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingTop: Platform.OS === 'android' ? 44 : 20,
-        paddingHorizontal: 20,
-        paddingBottom: 16,
+        paddingHorizontal: 16,
+        paddingBottom: 12,
         backgroundColor: '#ffffff',
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         backgroundColor: '#f8fafc',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#e2e8f0',
     },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    headerSubtitle: {
-        fontSize: 13,
-        color: '#64748b',
-        marginTop: 2,
-    },
-    addNavButton: {
-        borderRadius: 20,
-        overflow: 'hidden',
-    },
+    headerTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+    headerSubtitle: { fontSize: 12, color: '#64748b', marginTop: 1 },
+    addNavButton: { borderRadius: 16, overflow: 'hidden' },
     addNavGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         gap: 4,
     },
-    addNavButtonText: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: '700',
-    },
-    centerLoading: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scrollContent: {
-        padding: 20,
-        gap: 18,
-        paddingBottom: 40,
-    },
+    addNavButtonText: { color: '#ffffff', fontSize: 11, fontWeight: '700' },
+    centerLoading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    scrollContent: { padding: 16, gap: 14, paddingBottom: 30 },
     partnerInfoCard: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#ffffff',
-        padding: 16,
-        borderRadius: 20,
+        padding: 14,
+        borderRadius: 18,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        gap: 14,
+        gap: 12,
         shadowColor: '#0f172a',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
-        shadowRadius: 8,
+        shadowRadius: 6,
         elevation: 2,
     },
     verifiedPartnerCard: {
         backgroundColor: '#F4FBF4',
-        borderColor: '#D4EFC3',
-        shadowColor: '#76C815',
-        shadowOpacity: 0.12,
+        borderColor: '#C8E6C9',
+        shadowColor: '#4CAF50',
+        shadowOpacity: 0.1,
     },
     partnerInfoIcon: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#76C815',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 8,
-        elevation: 5,
+        shadowColor: '#4CAF50',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
     },
-    verifiedHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
+    verifiedHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     verifiedChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 3,
+        gap: 2,
         backgroundColor: '#d1fae5',
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 10,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#6ee7b7',
     },
-    verifiedChipText: {
-        fontSize: 10,
-        fontWeight: '800',
-        color: '#047857',
-    },
-    partnerInfoTitle: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    partnerInfoSubtitle: {
-        fontSize: 12,
-        color: '#64748b',
-        marginTop: 2,
-    },
+    verifiedChipText: { fontSize: 9, fontWeight: '800', color: '#047857' },
+    partnerInfoTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a' },
+    partnerInfoSubtitle: { fontSize: 11, color: '#64748b', marginTop: 1 },
     stationCountBadge: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: '#F0F9ED',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#E8F5E9',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#D4EFC3',
+        borderColor: '#C8E6C9',
     },
-    stationCountText: {
-        fontSize: 12,
-        fontWeight: '800',
-        color: '#76C815',
-    },
+    stationCountText: { fontSize: 11, fontWeight: '800', color: '#4CAF50' },
     sectionCard: {
         backgroundColor: '#ffffff',
-        borderRadius: 20,
-        padding: 18,
+        borderRadius: 18,
+        padding: 16,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        gap: 14,
+        gap: 12,
         shadowColor: '#0f172a',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
-        shadowRadius: 8,
+        shadowRadius: 6,
         elevation: 2,
     },
-    sectionHeaderRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    addNewLink: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#10b981',
-    },
-    emptyCard: {
-        alignItems: 'center',
-        paddingVertical: 32,
-        gap: 10,
-    },
+    sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a' },
+    emptyCard: { alignItems: 'center', paddingVertical: 24, gap: 8 },
     emptyIconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
         backgroundColor: '#f8fafc',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#e2e8f0',
     },
-    emptyTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#334155',
-    },
-    emptySub: {
-        fontSize: 13,
-        color: '#64748b',
-        textAlign: 'center',
-        paddingHorizontal: 20,
-    },
-    emptyAddButton: {
-        borderRadius: 20,
-        overflow: 'hidden',
-        marginTop: 8,
-    },
+    emptyTitle: { fontSize: 16, fontWeight: '700', color: '#334155' },
+    emptySub: { fontSize: 12, color: '#64748b', textAlign: 'center', paddingHorizontal: 16 },
+    emptyAddButton: { borderRadius: 16, overflow: 'hidden', marginTop: 6 },
     emptyAddGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        gap: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        gap: 6,
     },
-    emptyAddButtonText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '700',
-    },
+    emptyAddButtonText: { color: '#ffffff', fontSize: 13, fontWeight: '700' },
     stationItemCard: {
         backgroundColor: '#f8fafc',
-        borderRadius: 16,
-        padding: 14,
+        borderRadius: 14,
+        padding: 12,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        gap: 10,
-        marginBottom: 10,
+        gap: 8,
+        marginBottom: 8,
     },
-    stationItemHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-    },
-    stationItemName: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: '#0f172a',
-    },
-    stationItemAddress: {
-        fontSize: 12,
-        color: '#64748b',
-        marginTop: 2,
-    },
-    statusTag: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    statusAvail: {
-        backgroundColor: '#ecfdf5',
-    },
-    statusMaint: {
-        backgroundColor: '#fef3c7',
-    },
-    statusTagText: {
-        fontSize: 11,
-        fontWeight: '700',
-        color: '#059669',
-    },
+    stationItemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+    stationItemName: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
+    stationItemAddress: { fontSize: 11, color: '#64748b', marginTop: 1 },
+    statusTag: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+    statusAvail: { backgroundColor: '#ecfdf5' },
+    statusMaint: { backgroundColor: '#fef3c7' },
+    statusTagText: { fontSize: 10, fontWeight: '700', color: '#059669' },
     stationMetaRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
+        gap: 10,
         backgroundColor: '#ffffff',
-        padding: 10,
-        borderRadius: 12,
+        padding: 8,
+        borderRadius: 10,
         borderWidth: 1,
         borderColor: '#e2e8f0',
     },
-    metaChip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    metaValue: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#1e293b',
-    },
-    stationActionRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: 4,
-    },
-    editButton: {
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
+    metaChip: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+    metaValue: { fontSize: 11, fontWeight: '700', color: '#1e293b' },
+    stationActionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 2 },
+    editButton: { borderRadius: 10, overflow: 'hidden' },
     editGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        gap: 4,
     },
-    editButtonText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#059669',
-    },
-    deleteButton: {
-        padding: 6,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.5)',
-        justifyContent: 'flex-end',
-    },
+    editButtonText: { fontSize: 11, fontWeight: '700', color: '#4CAF50' },
+    deleteButton: { padding: 4 },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.5)', justifyContent: 'flex-end' },
     modalContainer: {
         backgroundColor: '#ffffff',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingHorizontal: 24,
-        paddingBottom: 34,
-        paddingTop: 8,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingHorizontal: 20,
+        paddingBottom: 28,
+        paddingTop: 6,
         maxHeight: height * 0.9,
     },
     modalHandle: {
-        width: 40,
+        width: 36,
         height: 4,
         borderRadius: 2,
         backgroundColor: '#e2e8f0',
         alignSelf: 'center',
-        marginBottom: 16,
+        marginBottom: 12,
     },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    modalTitle: {
-        fontSize: 22,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    closeButton: {
-        padding: 4,
-    },
-    formSection: {
-        marginBottom: 20,
-        gap: 14,
-    },
-    sectionTitleRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    inputGroup: {
-        gap: 6,
-    },
-    label: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#475569',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-    },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    modalTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+    closeButton: { padding: 4 },
+    formSection: { marginBottom: 16, gap: 12 },
+    sectionTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    inputGroup: { gap: 4 },
+    label: { fontSize: 11, fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: 0.3 },
     input: {
         backgroundColor: '#f8fafc',
-        borderRadius: 14,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        paddingHorizontal: 14,
-        height: 48,
-        fontSize: 14,
+        paddingHorizontal: 12,
+        height: 42,
+        fontSize: 13,
         color: '#0f172a',
     },
-    rowTwoInputs: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    searchRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    searchButton: {
-        backgroundColor: '#10b981',
-        width: 48,
-        height: 48,
-        borderRadius: 14,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    disabledSearchButton: {
-        backgroundColor: '#94a3b8',
-    },
-    disabledInput: {
-        backgroundColor: '#f1f5f9',
-        borderColor: '#cbd5e1',
-        color: '#64748b',
-    },
-    chipGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
+    rowTwoInputs: { flexDirection: 'row', gap: 10 },
+    searchRow: { flexDirection: 'row', gap: 6 },
+    searchButton: { backgroundColor: '#4CAF50', width: 42, height: 42, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    disabledSearchButton: { backgroundColor: '#94a3b8' },
+    disabledInput: { backgroundColor: '#f1f5f9', borderColor: '#cbd5e1', color: '#64748b' },
+    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     chip: {
         backgroundColor: '#f8fafc',
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderRadius: 18,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 14,
         borderWidth: 1,
         borderColor: '#e2e8f0',
     },
-    chipActive: {
-        backgroundColor: '#ecfdf5',
-        borderColor: '#10b981',
-    },
-    chipText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#64748b',
-    },
-    chipTextActive: {
-        color: '#059669',
-        fontWeight: '700',
-    },
+    chipActive: { backgroundColor: '#E8F5E9', borderColor: '#4CAF50' },
+    chipText: { fontSize: 11, fontWeight: '600', color: '#64748b' },
+    chipTextActive: { color: '#4CAF50', fontWeight: '700' },
     lockedBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
-        backgroundColor: '#ecfdf5',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
+        gap: 3,
+        backgroundColor: '#E8F5E9',
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#a7f3d0',
+        borderColor: '#A5D6A7',
     },
-    lockedBadgeText: {
-        fontSize: 11,
-        fontWeight: '700',
-        color: '#059669',
-    },
+    lockedBadgeText: { fontSize: 10, fontWeight: '700', color: '#4CAF50' },
     locationLockedCard: {
-        backgroundColor: '#ecfdf5',
-        borderRadius: 16,
+        backgroundColor: '#E8F5E9',
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: '#a7f3d0',
-        padding: 14,
-        gap: 12,
-    },
-    locationLockedHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        borderColor: '#A5D6A7',
+        padding: 12,
         gap: 10,
     },
+    locationLockedHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     locationLockedIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         backgroundColor: '#ffffff',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#a7f3d0',
+        borderColor: '#A5D6A7',
     },
-    locationLockedTitle: {
-        fontSize: 13,
-        fontWeight: '800',
-        color: '#065f46',
-    },
-    locationLockedAddress: {
-        fontSize: 12,
-        color: '#047857',
-        fontWeight: '600',
-        marginTop: 2,
-    },
-    locationActions: {
-        flexDirection: 'row',
-        gap: 10,
-    },
+    locationLockedTitle: { fontSize: 12, fontWeight: '800', color: '#2E7D32' },
+    locationLockedAddress: { fontSize: 11, color: '#388E3C', fontWeight: '600', marginTop: 1 },
+    locationActions: { flexDirection: 'row', gap: 8 },
     changeMapButton: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
+        gap: 4,
         backgroundColor: '#ffffff',
         borderWidth: 1,
-        borderColor: '#10b981',
-        paddingVertical: 10,
-        borderRadius: 12,
+        borderColor: '#4CAF50',
+        paddingVertical: 8,
+        borderRadius: 10,
     },
-    changeMapButtonText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#059669',
-    },
+    changeMapButtonText: { fontSize: 11, fontWeight: '700', color: '#4CAF50' },
     unlockButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
+        gap: 4,
         backgroundColor: '#ffffff',
         borderWidth: 1,
         borderColor: '#cbd5e1',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 10,
     },
-    unlockButtonText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#64748b',
-    },
-    mapTriggerButton: {
-        borderRadius: 14,
-        overflow: 'hidden',
-    },
+    unlockButtonText: { fontSize: 11, fontWeight: '600', color: '#64748b' },
+    mapTriggerButton: { borderRadius: 12, overflow: 'hidden' },
     mapTriggerGradient: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 14,
-        gap: 8,
+        paddingVertical: 12,
+        gap: 6,
     },
-    mapTriggerButtonText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '700',
-    },
+    mapTriggerButtonText: { color: '#ffffff', fontSize: 13, fontWeight: '700' },
     gpsButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#ecfdf5',
+        backgroundColor: '#E8F5E9',
         borderWidth: 1,
-        borderColor: '#a7f3d0',
-        paddingVertical: 12,
-        borderRadius: 14,
-        gap: 8,
+        borderColor: '#A5D6A7',
+        paddingVertical: 10,
+        borderRadius: 12,
+        gap: 6,
     },
-    gpsButtonText: {
-        color: '#059669',
-        fontSize: 13,
-        fontWeight: '700',
-    },
-    submitButton: {
-        borderRadius: 24,
-        overflow: 'hidden',
-        marginTop: 6,
-        marginBottom: 20,
-    },
-    submitButtonDisabled: {
-        opacity: 0.7,
-    },
+    gpsButtonText: { color: '#4CAF50', fontSize: 12, fontWeight: '700' },
+    submitButton: { borderRadius: 20, overflow: 'hidden', marginTop: 4, marginBottom: 16 },
+    submitButtonDisabled: { opacity: 0.7 },
     submitGradient: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
-        gap: 8,
+        paddingVertical: 14,
+        gap: 6,
     },
-    submitButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '800',
-        letterSpacing: 0.5,
-    },
+    submitButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '800', letterSpacing: 0.3 },
     mapModalContainer: {
         backgroundColor: '#ffffff',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingTop: 8,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingTop: 6,
         height: height * 0.95,
     },
-    mapModalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 24,
-        paddingVertical: 8,
-    },
-    mapModalTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
+    mapModalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 6 },
+    mapModalTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
     mapPickerSearchContainer: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
         backgroundColor: '#f8fafc',
         borderBottomWidth: 1,
         borderBottomColor: '#e2e8f0',
     },
-    mapPickerMapArea: {
-        flex: 1,
-        backgroundColor: '#e2e8f0',
-    },
+    mapPickerMapArea: { flex: 1, backgroundColor: '#e2e8f0' },
     centerPinOverlay: {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        marginLeft: -24,
-        marginTop: -40,
+        marginLeft: -20,
+        marginTop: -34,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    centerPinContainer: {
-        alignItems: 'center',
-    },
-    centerPinDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: '#0f172a',
-        marginTop: -8,
-    },
+    centerPinContainer: { alignItems: 'center' },
+    centerPinDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#0f172a', marginTop: -6 },
     mapPickerBottomCard: {
         backgroundColor: '#ffffff',
-        padding: 18,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        gap: 14,
+        padding: 14,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        gap: 10,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
-        elevation: 8,
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 6,
     },
     pinAddressContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 10,
         backgroundColor: '#f8fafc',
-        padding: 12,
-        borderRadius: 14,
+        padding: 10,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: '#e2e8f0',
     },
-    pinAddressTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#0f172a',
-    },
-    pinCoordsSub: {
-        fontSize: 12,
-        color: '#64748b',
-        marginTop: 2,
-    },
-    applyLocationButton: {
-        borderRadius: 18,
-        overflow: 'hidden',
-    },
+    pinAddressTitle: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
+    pinCoordsSub: { fontSize: 11, color: '#64748b', marginTop: 1 },
+    applyLocationButton: { borderRadius: 14, overflow: 'hidden' },
     applyLocationGradient: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
-        gap: 8,
+        paddingVertical: 14,
+        gap: 6,
     },
-    applyLocationButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '800',
-    },
+    applyLocationButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '800' },
 });

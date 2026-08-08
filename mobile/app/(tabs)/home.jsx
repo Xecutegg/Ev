@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -16,7 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -48,94 +48,26 @@ const DEFAULT_LOCATION = {
 };
 
 const CLEAN_MAP_STYLE = [
-    {
-        featureType: 'all',
-        elementType: 'labels.icon',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels.icon',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels.text',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.school',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.school',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.school',
-        elementType: 'labels.icon',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.government',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.medical',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.park',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.place_of_worship',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.attraction',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'poi.business',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'transit',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }],
-    },
-    {
-        featureType: 'administrative',
-        elementType: 'labels',
-        stylers: [{ visibility: 'on' }],
-    },
-    {
-        featureType: 'road',
-        elementType: 'labels',
-        stylers: [{ visibility: 'on' }],
-    },
+    { featureType: 'all', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.school', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.school', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.school', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.government', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.medical', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.park', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.place_of_worship', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.attraction', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi.business', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', elementType: 'all', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative', elementType: 'labels', stylers: [{ visibility: 'on' }] },
+    { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'on' }] },
 ];
 
-const RED_PIN_SVG = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44"><path d="M18 0 C8 0 0 8 0 18 C0 28 15 42 18 44 C21 42 36 28 36 18 C36 8 28 0 18 0 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/><circle cx="18" cy="17" r="12.5" fill="#ef4444"/><path d="M19 8 L11 20 L17 20 L16 27 L25 15 L19 15 Z" fill="#ffffff"/></svg>');
+const RED_PIN_SVG = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0 C7 0 0 7 0 16 C0 25 13 38 16 40 C19 38 32 25 32 16 C32 7 25 0 16 0 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/><circle cx="16" cy="15" r="11" fill="#ef4444"/><path d="M17 7 L10 18 L15 18 L14 24 L22 13 L17 13 Z" fill="#ffffff"/></svg>');
 
 function HomeScreen() {
     const { user, logout } = useAuth();
@@ -193,7 +125,7 @@ function HomeScreen() {
             };
             slots.push(`${fmt(h)} - ${fmt(nextH)}`);
         }
-        return slots.length > 0 ? slots : ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '11:00 AM - 12:00 PM', '12:00 PM - 01:00 PM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM'];
+        return slots.length > 0 ? slots : ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM'];
     };
 
     const openSlotBookingModal = (st) => {
@@ -277,7 +209,7 @@ function HomeScreen() {
             } else if (data.type === 'RAZORPAY_CANCEL') {
                 setShowRazorpayModal(false);
             }
-        } catch (_err) {}
+        } catch (_err) { }
     };
 
     useEffect(() => {
@@ -286,6 +218,12 @@ function HomeScreen() {
         animateEntrance();
         startPulseAnimation();
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchStations();
+        }, [])
+    );
 
     const fetchStations = async () => {
         setIsLoadingStations(true);
@@ -356,16 +294,6 @@ function HomeScreen() {
             }
         }
 
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-            try {
-                const iframe = document.querySelector('iframe[title="Live Location Map"]');
-                if (iframe && iframe.contentWindow && iframe.contentWindow.gMap) {
-                    iframe.contentWindow.gMap.panTo({ lat: coords.latitude, lng: coords.longitude });
-                    iframe.contentWindow.gMap.setZoom(16);
-                }
-            } catch (_e) { }
-        }
-
         if (webViewRef.current && webViewRef.current.injectJavaScript) {
             webViewRef.current.injectJavaScript(`
                 if (window.gMap) {
@@ -392,7 +320,7 @@ function HomeScreen() {
                         setAddress(formattedAddress || 'Your Location');
                     }
                 })
-                .catch(() => {});
+                .catch(() => { });
         }
     };
 
@@ -419,7 +347,7 @@ function HomeScreen() {
                                 return coords;
                             }
                         }
-                    } catch (_lkErr) {}
+                    } catch (_lkErr) { }
 
                     try {
                         const currentPos = await Promise.race([
@@ -439,7 +367,7 @@ function HomeScreen() {
                             fetchAddressAsync(coords.latitude, coords.longitude);
                             return coords;
                         }
-                    } catch (_curErr) {}
+                    } catch (_curErr) { }
                 }
             }
 
@@ -542,7 +470,6 @@ function HomeScreen() {
     const currentCoords = location || DEFAULT_LOCATION;
     const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
 
-    // Prepare station data for web
     const stationsDataForWeb = stations.map((st) => ({
         id: st._id,
         name: st.stationName || 'EV Station',
@@ -585,7 +512,6 @@ function HomeScreen() {
 
           window.gMap = gMap;
 
-          // User location marker
           new google.maps.Marker({
             position: userPos,
             map: gMap,
@@ -617,7 +543,6 @@ function HomeScreen() {
             zIndex: 1
           });
 
-          // Render EV Charging Stations using Red Lightning Teardrop Pin
           var stationsData = ${JSON.stringify(stationsDataForWeb)};
 
           stationsData.forEach(function(st) {
@@ -630,15 +555,15 @@ function HomeScreen() {
                   title: "⚡ " + st.name + " (" + st.power + ")",
                   icon: {
                       url: "${RED_PIN_SVG}",
-                      size: new google.maps.Size(36, 44),
-                      scaledSize: new google.maps.Size(36, 44),
-                      anchor: new google.maps.Point(18, 44)
+                      size: new google.maps.Size(32, 40),
+                      scaledSize: new google.maps.Size(32, 40),
+                      anchor: new google.maps.Point(16, 40)
                   },
                   zIndex: 100
               });
 
               var infoWindow = new google.maps.InfoWindow({
-                  content: '<div style="padding:6px;font-family:sans-serif;"><b>⚡ ' + st.name + '</b><br><span style="color:#ef4444;font-weight:bold;">₹' + st.price + ' / ' + (st.pricingType === 'per_kwh' ? 'kWh' : 'hr') + '</span> • ' + st.power + '</div>'
+                  content: '<div style="padding:4px;font-family:sans-serif;font-size:12px;"><b>⚡ ' + st.name + '</b><br><span style="color:#ef4444;font-weight:bold;">₹' + st.price + ' / ' + (st.pricingType === 'per_kwh' ? 'kWh' : 'hr') + '</span> • ' + st.power + '</div>'
               });
 
               stMarker.addListener('click', function() {
@@ -703,28 +628,26 @@ function HomeScreen() {
                             </Marker>
                         )}
 
-                        {/* Render All Database Charging Stations */}
                         {stations.map((st) => {
                             const lat = st.location?.coordinates?.[1];
                             const lng = st.location?.coordinates?.[0];
-                            
+
                             if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
 
                             return (
                                 <Marker
                                     key={st._id}
-                                    coordinate={{ 
-                                        latitude: parseFloat(lat), 
-                                        longitude: parseFloat(lng) 
+                                    coordinate={{
+                                        latitude: parseFloat(lat),
+                                        longitude: parseFloat(lng)
                                     }}
                                     onPress={() => openSlotBookingModal(st)}
                                     anchor={{ x: 0.5, y: 1.0 }}
                                 >
                                     <View style={styles.teardropMarkerContainer}>
-                                        {/* Red Teardrop Pin Shell */}
                                         <View style={styles.teardropPinShell}>
                                             <View style={styles.teardropInnerCircle}>
-                                                <Ionicons name="flash" size={16} color="#ffffff" />
+                                                <Ionicons name="flash" size={14} color="#ffffff" />
                                             </View>
                                         </View>
                                         <View style={styles.teardropPointerTip} />
@@ -746,7 +669,7 @@ function HomeScreen() {
                                     const found = stations.find(s => s._id === data.id);
                                     if (found) openSlotBookingModal(found);
                                 }
-                            } catch (_e) {}
+                            } catch (_e) { }
                         }}
                     />
                 ) : (
@@ -765,7 +688,7 @@ function HomeScreen() {
                         {isRefreshing ? (
                             <ActivityIndicator size="small" color="#10b981" />
                         ) : (
-                            <Ionicons name="locate" size={24} color="#10b981" />
+                            <Ionicons name="locate" size={22} color="#10b981" />
                         )}
                     </TouchableOpacity>
                 </Animated.View>
@@ -779,15 +702,15 @@ function HomeScreen() {
                 )}
             </View>
 
-            {/* Floating Header */}
+            {/* Floating Header - Compact */}
             <Animated.View
-                style={[styles.header, { paddingTop: Math.max(insets.top + 12, 40), opacity: fadeAnim }]}
+                style={[styles.header, { paddingTop: Math.max(insets.top + 8, 32), opacity: fadeAnim }]}
                 pointerEvents="box-none"
             >
                 <BlurView intensity={80} tint="light" style={styles.headerBlur}>
                     <View style={styles.headerContent}>
                         <View style={styles.locationBadge}>
-                            <Ionicons name="location" size={18} color="#10b981" />
+                            <Ionicons name="location" size={16} color="#10b981" />
                             <Text style={styles.locationText} numberOfLines={1}>
                                 {address}
                             </Text>
@@ -805,7 +728,7 @@ function HomeScreen() {
                                     end={{ x: 1, y: 0 }}
                                     style={styles.partnerGradient}
                                 >
-                                    <Ionicons name="add" size={16} color="#fff" />
+                                    <Ionicons name="add" size={14} color="#fff" />
                                     <Text style={styles.partnerButtonText}>Partner</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -827,7 +750,7 @@ function HomeScreen() {
                 </BlurView>
             </Animated.View>
 
-            {/* Profile Modal */}
+            {/* Profile Modal - Compact */}
             <Modal
                 visible={showProfileModal}
                 transparent={true}
@@ -844,11 +767,10 @@ function HomeScreen() {
                         onStartShouldSetResponder={() => true}
                     >
                         <View style={styles.modalHandle} />
-
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Profile</Text>
                             <TouchableOpacity onPress={hideModal} style={styles.closeButton}>
-                                <Ionicons name="close" size={24} color="#64748b" />
+                                <Ionicons name="close" size={22} color="#64748b" />
                             </TouchableOpacity>
                         </View>
 
@@ -863,28 +785,10 @@ function HomeScreen() {
                             <Text style={styles.profileEmail}>{user?.email || 'user@example.com'}</Text>
                             {user?.username && (
                                 <View style={styles.usernameBadge}>
-                                    <Ionicons name="at" size={14} color="#10b981" />
+                                    <Ionicons name="at" size={12} color="#10b981" />
                                     <Text style={styles.profileUsername}>{user.username}</Text>
                                 </View>
                             )}
-                        </View>
-
-                        <View style={styles.infoSection}>
-                            <View style={styles.infoRow}>
-                                <View style={styles.infoIcon}>
-                                    <Ionicons name="checkmark-circle" size={20} color="#10b981" />
-                                </View>
-                                <Text style={styles.infoText}>Verified Account</Text>
-                                <View style={styles.infoBadge}>
-                                    <Text style={styles.infoBadgeText}>Active</Text>
-                                </View>
-                            </View>
-                            <View style={styles.infoRow}>
-                                <View style={styles.infoIcon}>
-                                    <Ionicons name="shield-checkmark" size={20} color="#10b981" />
-                                </View>
-                                <Text style={styles.infoText}>Role: {user?.role || 'Customer'}</Text>
-                            </View>
                         </View>
 
                         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
@@ -892,7 +796,7 @@ function HomeScreen() {
                                 colors={['#ef4444', '#dc2626']}
                                 style={styles.logoutGradient}
                             >
-                                <Ionicons name="log-out" size={20} color="#ffffff" />
+                                <Ionicons name="log-out" size={18} color="#ffffff" />
                                 <Text style={styles.logoutButtonText}>Logout</Text>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -900,7 +804,7 @@ function HomeScreen() {
                 </TouchableOpacity>
             </Modal>
 
-            {/* ⚡ EV Slot Booking Bottom Sheet Modal */}
+            {/* ⚡ EV Slot Booking Bottom Sheet - Compact */}
             <Modal visible={showBookingModal} transparent animationType="none">
                 <TouchableOpacity
                     style={styles.modalOverlay}
@@ -918,54 +822,51 @@ function HomeScreen() {
 
                             {selectedStation && (
                                 <>
-                                    {/* Station Header */}
+                                    {/* Station Header - Compact */}
                                     <View style={styles.bookingHeaderRow}>
                                         <View style={{ flex: 1 }}>
                                             <View style={styles.brandRow}>
                                                 <Text style={styles.bookingBrandName}>{selectedStation.operatorBrand || 'Cutiepie'}</Text>
                                                 <View style={styles.availBadge}>
-                                                    <Ionicons name="ellipse" size={8} color="#10b981" />
+                                                    <Ionicons name="ellipse" size={6} color="#10b981" />
                                                     <Text style={styles.availText}>{selectedStation.status || 'Available'}</Text>
                                                 </View>
                                             </View>
                                             <Text style={styles.bookingStationTitle}>⚡ {selectedStation.stationName}</Text>
-                                            <Text style={styles.bookingAddressText} numberOfLines={1}>
-                                                📍 {selectedStation.address || selectedStation.cityState}
-                                            </Text>
                                         </View>
                                         <TouchableOpacity style={styles.closeModalBtn} onPress={hideSlotBookingModal}>
-                                            <Ionicons name="close" size={20} color="#64748b" />
+                                            <Ionicons name="close" size={18} color="#64748b" />
                                         </TouchableOpacity>
                                     </View>
 
-                                    {/* Quick Spec Chips */}
+                                    {/* Quick Spec Chips - Compact */}
                                     <View style={styles.specChipsRow}>
                                         <View style={styles.specChip}>
-                                            <Ionicons name="flash" size={14} color="#10b981" />
+                                            <Ionicons name="flash" size={12} color="#10b981" />
                                             <Text style={styles.specChipText}>{selectedStation.powerOutput || '7.2 kW'}</Text>
                                         </View>
                                         <View style={styles.specChip}>
-                                            <Ionicons name="pricetag" size={14} color="#10b981" />
-                                            <Text style={styles.specChipText}>₹{selectedStation.priceRate || 15} / kWh</Text>
+                                            <Ionicons name="pricetag" size={12} color="#10b981" />
+                                            <Text style={styles.specChipText}>₹{selectedStation.priceRate || 15}/kWh</Text>
                                         </View>
                                         <View style={styles.specChip}>
-                                            <Ionicons name="time" size={14} color="#10b981" />
+                                            <Ionicons name="time" size={12} color="#10b981" />
                                             <Text style={styles.specChipText}>{selectedStation.operatingDays || '24/7'}</Text>
                                         </View>
                                     </View>
 
-                                    {/* Connector Selector */}
+                                    {/* Connector Selector - Compact */}
                                     {selectedStation.connectors && selectedStation.connectors.length > 0 && (
                                         <View style={styles.sectionBlock}>
-                                            <Text style={styles.sectionTitleText}>Select Connector</Text>
+                                            <Text style={styles.sectionTitleText}>Connector</Text>
                                             <View style={styles.connectorRow}>
-                                                {selectedStation.connectors.map((c) => (
+                                                {selectedStation.connectors.slice(0, 3).map((c) => (
                                                     <TouchableOpacity
                                                         key={c}
                                                         style={[styles.connectorChip, selectedConnector === c && styles.connectorChipActive]}
                                                         onPress={() => setSelectedConnector(c)}
                                                     >
-                                                        <Ionicons name="hardware-chip" size={16} color={selectedConnector === c ? '#ffffff' : '#059669'} />
+                                                        <Ionicons name="hardware-chip" size={14} color={selectedConnector === c ? '#ffffff' : '#059669'} />
                                                         <Text style={[styles.connectorChipText, selectedConnector === c && styles.connectorChipTextActive]}>{c}</Text>
                                                     </TouchableOpacity>
                                                 ))}
@@ -973,15 +874,15 @@ function HomeScreen() {
                                         </View>
                                     )}
 
-                                    {/* Slot Date Selector */}
+                                    {/* Date & Slots - Compact */}
                                     <View style={styles.sectionBlock}>
-                                        <Text style={styles.sectionTitleText}>Select Date</Text>
+                                        <Text style={styles.sectionTitleText}>Date & Time</Text>
                                         <View style={styles.dateRow}>
                                             {[0, 1, 2].map((offset) => {
                                                 const d = new Date();
                                                 d.setDate(d.getDate() + offset);
                                                 const dateStr = d.toISOString().split('T')[0];
-                                                const label = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                                                const label = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
                                                 const isSel = selectedDate === dateStr;
                                                 return (
                                                     <TouchableOpacity
@@ -994,13 +895,8 @@ function HomeScreen() {
                                                 );
                                             })}
                                         </View>
-                                    </View>
-
-                                    {/* 1-Hour Time Slots */}
-                                    <View style={styles.sectionBlock}>
-                                        <Text style={styles.sectionTitleText}>Available 1-Hour Time Slots</Text>
                                         <View style={styles.slotsGrid}>
-                                            {generateTimeSlots(selectedStation).slice(0, 8).map((slot) => {
+                                            {generateTimeSlots(selectedStation).slice(0, 4).map((slot) => {
                                                 const isSel = selectedSlot === slot;
                                                 return (
                                                     <TouchableOpacity
@@ -1008,7 +904,7 @@ function HomeScreen() {
                                                         style={[styles.slotCard, isSel && styles.slotCardActive]}
                                                         onPress={() => setSelectedSlot(slot)}
                                                     >
-                                                        <Ionicons name="time-outline" size={14} color={isSel ? '#ffffff' : '#475569'} />
+                                                        <Ionicons name="time-outline" size={12} color={isSel ? '#ffffff' : '#475569'} />
                                                         <Text style={[styles.slotCardText, isSel && styles.slotCardTextActive]}>{slot}</Text>
                                                     </TouchableOpacity>
                                                 );
@@ -1016,28 +912,28 @@ function HomeScreen() {
                                         </View>
                                     </View>
 
-                                    {/* Duration Selector */}
+                                    {/* Duration - Compact */}
                                     <View style={styles.sectionBlock}>
-                                        <Text style={styles.sectionTitleText}>Duration (Hours)</Text>
+                                        <Text style={styles.sectionTitleText}>Duration</Text>
                                         <View style={styles.durationRow}>
-                                            {[1, 2, 3, 4].map((hr) => (
+                                            {[1, 2, 3].map((hr) => (
                                                 <TouchableOpacity
                                                     key={hr}
                                                     style={[styles.durationChip, durationHours === hr && styles.durationChipActive]}
                                                     onPress={() => setDurationHours(hr)}
                                                 >
                                                     <Text style={[styles.durationChipText, durationHours === hr && styles.durationChipTextActive]}>
-                                                        {hr} Hr ({'₹' + (selectedStation.priceRate || 15) * hr})
+                                                        {hr}hr ₹{(selectedStation.priceRate || 15) * hr}
                                                     </Text>
                                                 </TouchableOpacity>
                                             ))}
                                         </View>
                                     </View>
 
-                                    {/* Total Amount & Pay Button */}
+                                    {/* Footer - Compact */}
                                     <View style={styles.bookingFooter}>
                                         <View style={styles.totalPriceBlock}>
-                                            <Text style={styles.totalLabel}>Total Amount</Text>
+                                            <Text style={styles.totalLabel}>Total</Text>
                                             <Text style={styles.totalAmountText}>₹{(selectedStation.priceRate || 15) * durationHours}</Text>
                                         </View>
                                         <TouchableOpacity
@@ -1051,8 +947,8 @@ function HomeScreen() {
                                                     <ActivityIndicator size="small" color="#ffffff" />
                                                 ) : (
                                                     <>
-                                                        <Ionicons name="shield-checkmark" size={18} color="#ffffff" />
-                                                        <Text style={styles.payBtnText}>Pay ₹{(selectedStation.priceRate || 15) * durationHours} with Razorpay</Text>
+                                                        <Ionicons name="shield-checkmark" size={16} color="#ffffff" />
+                                                        <Text style={styles.payBtnText}>Pay Now</Text>
                                                     </>
                                                 )}
                                             </LinearGradient>
@@ -1065,7 +961,7 @@ function HomeScreen() {
                 </TouchableOpacity>
             </Modal>
 
-            {/* 💳 Razorpay Checkout Modal (Seamless Native WebView) */}
+            {/* 💳 Razorpay Checkout Modal */}
             <Modal visible={showRazorpayModal} animationType="slide" transparent={false}>
                 <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
                     {razorpayOrder && WebView ? (
@@ -1090,9 +986,8 @@ function HomeScreen() {
                                                 key: "${razorpayOrder.keyId}",
                                                 amount: "${razorpayOrder.amountInPaise}",
                                                 currency: "INR",
-                                                name: "Electrically EV Charging",
+                                                name: "Electrically",
                                                 description: "Booking at ${selectedStation?.stationName}",
-                                                image: "https://cdn-icons-png.flaticon.com/512/2983/2983780.png",
                                                 order_id: "${razorpayOrder.orderId}",
                                                 prefill: {
                                                     name: "${user?.name || 'EV Driver'}",
@@ -1138,19 +1033,18 @@ function HomeScreen() {
                 </View>
             </Modal>
 
-            {/* 🎉 High-End Success Celebration Modal */}
+            {/* 🎉 Success Celebration Modal - Compact */}
             <Modal visible={showSuccessModal} transparent animationType="fade">
                 <View style={styles.successOverlay}>
                     <View style={styles.successCard}>
-                        {/* Celebrating Icon Ring */}
                         <View style={styles.successIconOuterRing}>
                             <LinearGradient colors={['#76C815', '#65B811']} style={styles.successIconBadge}>
-                                <Ionicons name="checkmark-sharp" size={38} color="#ffffff" />
+                                <Ionicons name="checkmark-sharp" size={32} color="#ffffff" />
                             </LinearGradient>
                         </View>
 
                         <Text style={styles.successTitle}>Booking Confirmed! 🎉</Text>
-                        <Text style={styles.successSub}>Your EV charging slot has been reserved successfully.</Text>
+                        <Text style={styles.successSub}>Your EV charging slot is reserved</Text>
 
                         {confirmedBookingDetails && (
                             <View style={styles.successDetailsCard}>
@@ -1159,15 +1053,11 @@ function HomeScreen() {
                                     <Text style={styles.detailValueBold}>⚡ {confirmedBookingDetails.stationName}</Text>
                                 </View>
                                 <View style={styles.successDetailRow}>
-                                    <Text style={styles.detailLabel}>Slot Time</Text>
-                                    <Text style={styles.detailValue}>{confirmedBookingDetails.date} ({confirmedBookingDetails.slotTime})</Text>
+                                    <Text style={styles.detailLabel}>Time</Text>
+                                    <Text style={styles.detailValue}>{confirmedBookingDetails.slotTime}</Text>
                                 </View>
-                                <View style={styles.successDetailRow}>
-                                    <Text style={styles.detailLabel}>Duration</Text>
-                                    <Text style={styles.detailValue}>{confirmedBookingDetails.duration} Hr</Text>
-                                </View>
-                                <View style={[styles.successDetailRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-                                    <Text style={styles.detailLabel}>Total Paid</Text>
+                                <View style={[styles.successDetailRow, { borderBottomWidth: 0 }]}>
+                                    <Text style={styles.detailLabel}>Amount</Text>
                                     <Text style={styles.detailAmountPaid}>₹{confirmedBookingDetails.amount}</Text>
                                 </View>
                             </View>
@@ -1183,8 +1073,8 @@ function HomeScreen() {
                             activeOpacity={0.8}
                         >
                             <LinearGradient colors={['#76C815', '#5BA70E']} style={styles.doneBtnGradient}>
-                                <Ionicons name="list" size={18} color="#ffffff" />
-                                <Text style={styles.doneBtnText}>View Booking History</Text>
+                                <Ionicons name="list" size={16} color="#ffffff" />
+                                <Text style={styles.doneBtnText}>View History</Text>
                             </LinearGradient>
                         </TouchableOpacity>
                     </View>
@@ -1195,40 +1085,37 @@ function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F4FBF4',
-    },
+    container: { flex: 1, backgroundColor: '#F4FBF4' },
     header: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        paddingHorizontal: 16,
-        paddingBottom: 12,
+        paddingHorizontal: 12,
+        paddingBottom: 8,
         zIndex: 20,
     },
     headerBlur: {
-        borderRadius: 20,
+        borderRadius: 16,
         overflow: 'hidden',
-        backgroundColor: 'rgba(255,255,255,0.7)',
+        backgroundColor: 'rgba(255,255,255,0.8)',
     },
     headerContent: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
     },
     locationBadge: {
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
-        gap: 8,
-        marginRight: 10,
+        gap: 6,
+        marginRight: 8,
     },
     locationText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '600',
         color: '#0f172a',
         flex: 1,
@@ -1236,49 +1123,43 @@ const styles = StyleSheet.create({
     headerActions: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 6,
     },
     partnerButton: {
-        borderRadius: 12,
+        borderRadius: 10,
         overflow: 'hidden',
     },
     partnerGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
         gap: 4,
     },
     partnerButtonText: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '700',
         color: '#ffffff',
     },
     avatarButton: {
-        borderRadius: 20,
+        borderRadius: 18,
         overflow: 'hidden',
         borderWidth: 2,
         borderColor: '#ffffff',
     },
     avatarGradient: {
-        width: 36,
-        height: 36,
+        width: 32,
+        height: 32,
         justifyContent: 'center',
         alignItems: 'center',
     },
     avatarText: {
         color: '#ffffff',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '800',
     },
-    mapContainer: {
-        flex: 1,
-        position: 'relative',
-    },
-    map: {
-        width: '100%',
-        height: '100%',
-    },
+    mapContainer: { flex: 1, position: 'relative' },
+    map: { width: '100%', height: '100%' },
     webMapFallback: {
         width: '100%',
         height: '100%',
@@ -1288,15 +1169,15 @@ const styles = StyleSheet.create({
     },
     loadingStationsOverlay: {
         position: 'absolute',
-        top: 100,
+        top: 80,
         alignSelf: 'center',
         backgroundColor: 'rgba(255,255,255,0.9)',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        borderRadius: 16,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 6,
         borderWidth: 1,
         borderColor: '#e2e8f0',
         shadowColor: '#000',
@@ -1305,32 +1186,23 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-    loadingStationsText: {
-        fontSize: 12,
-        color: '#475569',
-        fontWeight: '600',
-    },
-    gmapMarkerContainer: {
-        width: 48,
-        height: 48,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+    loadingStationsText: { fontSize: 11, color: '#475569', fontWeight: '600' },
+    gmapMarkerContainer: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
     gmapOuterRing: {
         position: 'absolute',
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        width: 38,
+        height: 38,
+        borderRadius: 19,
         backgroundColor: 'rgba(118, 200, 21, 0.18)',
         borderWidth: 1.5,
         borderColor: 'rgba(118, 200, 21, 0.35)',
     },
     gmapDot: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
         backgroundColor: '#76C815',
-        borderWidth: 4,
+        borderWidth: 3,
         borderColor: '#ffffff',
         justifyContent: 'center',
         alignItems: 'center',
@@ -1340,31 +1212,25 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 6,
     },
-    gmapDotInner: {
-        width: 0,
-        height: 0,
-    },
-    teardropMarkerContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+    gmapDotInner: { width: 0, height: 0 },
+    teardropMarkerContainer: { alignItems: 'center', justifyContent: 'center' },
     teardropPinShell: {
-        width: 38,
-        height: 38,
-        borderRadius: 19,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         backgroundColor: '#ffffff',
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 7,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 6,
     },
     teardropInnerCircle: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
+        width: 26,
+        height: 26,
+        borderRadius: 13,
         backgroundColor: '#ef4444',
         justifyContent: 'center',
         alignItems: 'center',
@@ -1374,48 +1240,33 @@ const styles = StyleSheet.create({
         height: 0,
         backgroundColor: 'transparent',
         borderStyle: 'solid',
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderTopWidth: 8,
+        borderLeftWidth: 5,
+        borderRightWidth: 5,
+        borderTopWidth: 7,
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderTopColor: '#ffffff',
-        marginTop: -3,
-    },
-    teardropLabelPill: {
-        marginTop: 4,
-        backgroundColor: 'rgba(15, 23, 42, 0.88)',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    teardropLabelText: {
-        color: '#ffffff',
-        fontSize: 10,
-        fontWeight: '800',
-        maxWidth: 110,
+        marginTop: -2,
     },
     fabContainer: {
         position: 'absolute',
-        right: 20,
-        bottom: Platform.OS === 'ios' ? 140 : 120,
+        right: 16,
+        bottom: Platform.OS === 'ios' ? 120 : 100,
     },
     myLocationFab: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         backgroundColor: '#ffffff',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#e2e8f0',
         shadowColor: '#0f172a',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        elevation: 8,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+        elevation: 6,
     },
     modalOverlay: {
         flex: 1,
@@ -1424,547 +1275,307 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         backgroundColor: '#ffffff',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingHorizontal: 24,
-        paddingBottom: 34,
-        paddingTop: 8,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingHorizontal: 20,
+        paddingBottom: 28,
+        paddingTop: 6,
     },
     modalHandle: {
-        width: 40,
+        width: 36,
         height: 4,
         borderRadius: 2,
         backgroundColor: '#e2e8f0',
         alignSelf: 'center',
-        marginBottom: 16,
+        marginBottom: 12,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 16,
     },
-    modalTitle: {
-        fontSize: 24,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    closeButton: {
-        padding: 4,
-    },
+    modalTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a' },
+    closeButton: { padding: 4 },
     profileCard: {
         alignItems: 'center',
-        paddingVertical: 24,
+        paddingVertical: 20,
         backgroundColor: '#f8fafc',
-        borderRadius: 24,
+        borderRadius: 20,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        gap: 8,
-        marginBottom: 20,
+        gap: 6,
+        marginBottom: 16,
     },
     bigAvatarGradient: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 6,
     },
-    bigAvatarText: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: '#ffffff',
-    },
-    profileName: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#0f172a',
-    },
-    profileEmail: {
-        fontSize: 14,
-        color: '#64748b',
-    },
+    bigAvatarText: { fontSize: 28, fontWeight: '800', color: '#ffffff' },
+    profileName: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
+    profileEmail: { fontSize: 13, color: '#64748b' },
     usernameBadge: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
         backgroundColor: '#F0F9ED',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    profileUsername: {
-        fontSize: 13,
-        color: '#76C815',
-        fontWeight: '700',
-    },
-    infoSection: {
-        gap: 12,
-        marginBottom: 20,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        backgroundColor: '#f8fafc',
-        padding: 14,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-    },
-    infoIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#F0F9ED',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    infoText: {
-        color: '#0f172a',
-        fontSize: 14,
-        fontWeight: '600',
-        flex: 1,
-    },
-    infoBadge: {
-        backgroundColor: '#d1fae5',
         paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingVertical: 3,
+        borderRadius: 10,
     },
-    infoBadgeText: {
-        color: '#065f46',
-        fontSize: 11,
-        fontWeight: '700',
-    },
-    logoutButton: {
-        borderRadius: 16,
-        overflow: 'hidden',
-    },
+    profileUsername: { fontSize: 12, color: '#76C815', fontWeight: '700' },
+    logoutButton: { borderRadius: 14, overflow: 'hidden' },
     logoutGradient: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 16,
-        gap: 8,
+        paddingVertical: 14,
+        gap: 6,
     },
-    logoutButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '700',
-    },
-    // Map Pin Highlight Badge
-    mapHighlightBadge: {
-        backgroundColor: '#ffffff',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 12,
-        marginBottom: 4,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        alignItems: 'center',
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 6,
-        maxWidth: 180,
-    },
-    mapHighlightTitle: {
-        fontSize: 12,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    mapHighlightSub: {
-        fontSize: 10,
-        fontWeight: '600',
-        color: '#76C815',
-    },
-
-    // Slot Booking Bottom Sheet Styles
+    logoutButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+    // Booking Modal Styles - Compact
     bookingModalContent: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
         backgroundColor: '#ffffff',
-        borderTopLeftRadius: 28,
-        borderTopRightRadius: 28,
-        paddingHorizontal: 20,
-        paddingTop: 12,
-        paddingBottom: Platform.OS === 'ios' ? 36 : 20,
-        maxHeight: height * 0.85,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingHorizontal: 16,
+        paddingTop: 10,
+        paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+        maxHeight: height * 0.8,
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: -10 },
-        shadowOpacity: 0.25,
-        shadowRadius: 20,
-        elevation: 20,
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        elevation: 16,
     },
     sheetHandle: {
-        width: 44,
-        height: 5,
+        width: 36,
+        height: 4,
         backgroundColor: '#cbd5e1',
-        borderRadius: 3,
+        borderRadius: 2,
         alignSelf: 'center',
-        marginBottom: 16,
+        marginBottom: 12,
     },
     bookingHeaderRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: 12,
+        marginBottom: 8,
     },
     brandRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 6,
         marginBottom: 2,
     },
     bookingBrandName: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '700',
         color: '#76C815',
         textTransform: 'uppercase',
-        letterSpacing: 0.5,
+        letterSpacing: 0.3,
     },
     availBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 3,
         backgroundColor: '#F0F9ED',
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 10,
+        borderRadius: 8,
     },
-    availText: {
-        fontSize: 11,
-        fontWeight: '600',
-        color: '#76C815',
-    },
-    bookingStationTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    bookingAddressText: {
-        fontSize: 12,
-        color: '#64748b',
-        marginTop: 2,
-    },
+    availText: { fontSize: 10, fontWeight: '600', color: '#76C815' },
+    bookingStationTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a' },
     closeModalBtn: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         backgroundColor: '#f1f5f9',
         justifyContent: 'center',
         alignItems: 'center',
     },
     specChipsRow: {
         flexDirection: 'row',
-        gap: 8,
-        marginBottom: 16,
+        gap: 6,
+        marginBottom: 12,
     },
     specChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 3,
         backgroundColor: '#F4FBF4',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#D4EFC3',
     },
-    specChipText: {
-        fontSize: 11,
-        fontWeight: '700',
-        color: '#76C815',
-    },
-    sectionBlock: {
-        marginBottom: 14,
-    },
-    sectionTitleText: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#334155',
-        marginBottom: 8,
-    },
-    connectorRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
+    specChipText: { fontSize: 10, fontWeight: '700', color: '#76C815' },
+    sectionBlock: { marginBottom: 10 },
+    sectionTitleText: { fontSize: 12, fontWeight: '700', color: '#334155', marginBottom: 6 },
+    connectorRow: { flexDirection: 'row', gap: 6 },
     connectorChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderRadius: 12,
+        gap: 4,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 10,
         backgroundColor: '#f8fafc',
         borderWidth: 1.5,
         borderColor: '#cbd5e1',
     },
-    connectorChipActive: {
-        backgroundColor: '#76C815',
-        borderColor: '#76C815',
-    },
-    connectorChipText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#334155',
-    },
-    connectorChipTextActive: {
-        color: '#ffffff',
-    },
-    dateRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
+    connectorChipActive: { backgroundColor: '#76C815', borderColor: '#76C815' },
+    connectorChipText: { fontSize: 11, fontWeight: '700', color: '#334155' },
+    connectorChipTextActive: { color: '#ffffff' },
+    dateRow: { flexDirection: 'row', gap: 6, marginBottom: 6 },
     dateChip: {
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 10,
         backgroundColor: '#f8fafc',
         borderWidth: 1.5,
         borderColor: '#cbd5e1',
     },
-    dateChipActive: {
-        backgroundColor: '#0f172a',
-        borderColor: '#0f172a',
-    },
-    dateChipText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#475569',
-    },
-    dateChipTextActive: {
-        color: '#ffffff',
-    },
-    slotsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
+    dateChipActive: { backgroundColor: '#0f172a', borderColor: '#0f172a' },
+    dateChipText: { fontSize: 11, fontWeight: '700', color: '#475569' },
+    dateChipTextActive: { color: '#ffffff' },
+    slotsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     slotCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 10,
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        borderRadius: 8,
         backgroundColor: '#f8fafc',
         borderWidth: 1,
         borderColor: '#e2e8f0',
         width: '48%',
     },
-    slotCardActive: {
-        backgroundColor: '#76C815',
-        borderColor: '#76C815',
-    },
-    slotCardText: {
-        fontSize: 11,
-        fontWeight: '600',
-        color: '#334155',
-    },
-    slotCardTextActive: {
-        color: '#ffffff',
-        fontWeight: '700',
-    },
-    durationRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
+    slotCardActive: { backgroundColor: '#76C815', borderColor: '#76C815' },
+    slotCardText: { fontSize: 10, fontWeight: '600', color: '#334155' },
+    slotCardTextActive: { color: '#ffffff', fontWeight: '700' },
+    durationRow: { flexDirection: 'row', gap: 6 },
     durationChip: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
         backgroundColor: '#f8fafc',
         borderWidth: 1,
         borderColor: '#cbd5e1',
     },
-    durationChipActive: {
-        backgroundColor: '#76C815',
-        borderColor: '#76C815',
-    },
-    durationChipText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#334155',
-    },
-    durationChipTextActive: {
-        color: '#ffffff',
-    },
+    durationChipActive: { backgroundColor: '#76C815', borderColor: '#76C815' },
+    durationChipText: { fontSize: 11, fontWeight: '700', color: '#334155' },
+    durationChipTextActive: { color: '#ffffff' },
     bookingFooter: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: 12,
-        paddingTop: 12,
+        marginTop: 8,
+        paddingTop: 8,
         borderTopWidth: 1,
         borderColor: '#f1f5f9',
     },
-    totalPriceBlock: {
-        justifyContent: 'center',
-    },
-    totalLabel: {
-        fontSize: 11,
-        color: '#64748b',
-        fontWeight: '600',
-    },
-    totalAmountText: {
-        fontSize: 22,
-        fontWeight: '900',
-        color: '#76C815',
-    },
+    totalPriceBlock: { justifyContent: 'center' },
+    totalLabel: { fontSize: 10, color: '#64748b', fontWeight: '600' },
+    totalAmountText: { fontSize: 20, fontWeight: '900', color: '#76C815' },
     payRazorpayBtn: {
-        borderRadius: 14,
+        borderRadius: 12,
         overflow: 'hidden',
         flex: 1,
-        marginLeft: 16,
+        marginLeft: 12,
     },
     payBtnGradient: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
-        paddingVertical: 14,
-        paddingHorizontal: 16,
-    },
-    payBtnText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '800',
-    },
-
-    // Razorpay Modal Styles
-    razorpayHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
+        gap: 6,
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderColor: '#e2e8f0',
-        backgroundColor: '#ffffff',
+        paddingHorizontal: 12,
     },
-    closeRazorpayBtn: {
-        padding: 6,
-        marginRight: 12,
-    },
-    razorpayHeaderTitle: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-
-    // Success Celebration Modal Styles
+    payBtnText: { color: '#ffffff', fontSize: 13, fontWeight: '800' },
+    // Success Modal Styles - Compact
     successOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 24,
+        paddingHorizontal: 20,
     },
     successCard: {
         width: '100%',
         backgroundColor: '#ffffff',
-        borderRadius: 28,
-        padding: 24,
+        borderRadius: 24,
+        padding: 20,
         alignItems: 'center',
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 24,
-        elevation: 24,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 20,
     },
     successIconOuterRing: {
-        width: 84,
-        height: 84,
-        borderRadius: 42,
+        width: 68,
+        height: 68,
+        borderRadius: 34,
         backgroundColor: '#F0F9ED',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 12,
     },
     successIconBadge: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        width: 52,
+        height: 52,
+        borderRadius: 26,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#76C815',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 10,
-        elevation: 8,
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
     },
-    successTitle: {
-        fontSize: 22,
-        fontWeight: '800',
-        color: '#0f172a',
-        textAlign: 'center',
-        marginBottom: 6,
-    },
-    successSub: {
-        fontSize: 13,
-        color: '#64748b',
-        textAlign: 'center',
-        lineHeight: 18,
-        marginBottom: 20,
-    },
+    successTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', textAlign: 'center', marginBottom: 4 },
+    successSub: { fontSize: 12, color: '#64748b', textAlign: 'center', marginBottom: 16 },
     successDetailsCard: {
         width: '100%',
         backgroundColor: '#f8fafc',
-        borderRadius: 18,
-        padding: 16,
+        borderRadius: 16,
+        padding: 14,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        marginBottom: 20,
+        marginBottom: 16,
     },
     successDetailRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 8,
+        paddingVertical: 6,
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
     },
-    detailLabel: {
-        fontSize: 12,
-        color: '#64748b',
-        fontWeight: '600',
-    },
-    detailValueBold: {
-        fontSize: 13,
-        fontWeight: '800',
-        color: '#0f172a',
-    },
-    detailValue: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#334155',
-    },
-    detailAmountPaid: {
-        fontSize: 16,
-        fontWeight: '900',
-        color: '#76C815',
-    },
-    doneBtn: {
-        width: '100%',
-        borderRadius: 16,
-        overflow: 'hidden',
-    },
+    detailLabel: { fontSize: 11, color: '#64748b', fontWeight: '600' },
+    detailValueBold: { fontSize: 12, fontWeight: '800', color: '#0f172a' },
+    detailValue: { fontSize: 11, fontWeight: '700', color: '#334155' },
+    detailAmountPaid: { fontSize: 15, fontWeight: '900', color: '#76C815' },
+    doneBtn: { width: '100%', borderRadius: 14, overflow: 'hidden' },
     doneBtnGradient: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
-        paddingVertical: 14,
+        gap: 6,
+        paddingVertical: 12,
     },
-    doneBtnText: {
-        color: '#ffffff',
-        fontSize: 15,
-        fontWeight: '800',
-    },
+    doneBtnText: { color: '#ffffff', fontSize: 14, fontWeight: '800' },
 });
 
 export default HomeScreen;

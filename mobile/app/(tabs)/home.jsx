@@ -38,7 +38,7 @@ try {
 } catch (_e) { }
 
 const { width, height } = Dimensions.get('window');
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCv95QW0IJO_m718bSrFlgkvMM5QmgXWGA';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCY0or-189ZRZ-Ig4oJlzLr9tRaZUYCIYo';
 
 const DEFAULT_LOCATION = {
     latitude: 28.6139,

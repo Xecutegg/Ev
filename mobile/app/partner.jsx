@@ -1335,9 +1335,7 @@ export default function PartnerScreen() {
                                     <MapView
                                         ref={modalMapRef}
                                         style={{ flex: 1 }}
-                                        provider={PROVIDER_GOOGLE}
-                                        mapType="hybrid"
-                                        customMapStyle={CLEAN_MAP_STYLE}
+                                        mapType="standard"
                                         initialRegion={{
                                             latitude: pinCoords.latitude,
                                             longitude: pinCoords.longitude,

@@ -12,7 +12,12 @@ function RootLayoutNav() {
     useEffect(() => {
         if (isLoading) return;
 
-        const inAuthGroup = segments[0] === '(auth)';
+        const currentRoute = Array.isArray(segments) ? segments.join('/') : '';
+        const inAuthGroup =
+            segments.includes('(auth)') ||
+            ['welcome', 'login', 'register', 'verify-otp', 'forgot-password'].some(
+                (route) => currentRoute.includes(route) || segments.includes(route)
+            );
 
         if (isAuthenticated && inAuthGroup) {
             // Authenticated user on auth screen → go to tabs

@@ -23,21 +23,37 @@ const api = axios.create({
 
 // ─── Token Storage ───────────────────────────────────────────
 const setTokens = async (accessToken, refreshToken) => {
-    await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
-    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+    try {
+        if (accessToken) await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, String(accessToken));
+        if (refreshToken) await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, String(refreshToken));
+    } catch (e) {
+        console.warn('SecureStore setTokens error:', e);
+    }
 };
 
 const getAccessToken = async () => {
-    return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+    try {
+        return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+    } catch (e) {
+        return null;
+    }
 };
 
 const getRefreshToken = async () => {
-    return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+    try {
+        return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+    } catch (e) {
+        return null;
+    }
 };
 
 const clearTokens = async () => {
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    try {
+        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    } catch (e) {
+        console.warn('SecureStore clearTokens error:', e);
+    }
 };
 
 // ─── Request Interceptor ────────────────────────────────────

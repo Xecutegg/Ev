@@ -112,6 +112,7 @@ export default function VerifyOtpScreen() {
         setIsSubmitting(true);
         try {
             await verifyOtp(email, code);
+            router.replace('/(tabs)/home');
         } catch (error) {
             const message =
                 error.response?.data?.message ||

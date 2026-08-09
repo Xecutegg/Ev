@@ -190,6 +190,8 @@ export default function LoginScreen() {
                 });
                 return;
             }
+
+            router.replace('/(tabs)/home');
         } catch (error) {
             const message =
                 error.response?.data?.message ||

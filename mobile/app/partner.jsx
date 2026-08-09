@@ -13,12 +13,15 @@ import {
     Modal,
     Animated,
     Dimensions,
+    KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import stationService from '../services/station.service.js';
+import configService from '../services/config.service.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
     ArrowLeft,
@@ -100,6 +103,8 @@ export default function PartnerScreen() {
     const [pinAddress, setPinAddress] = useState('');
     const [modalSearchText, setModalSearchText] = useState('');
     const [isSearchingModal, setIsSearchingModal] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const searchDebounceTimer = useRef(null);
 
     // Map References & Timers
     const modalMapRef = useRef(null);
@@ -183,12 +188,18 @@ export default function PartnerScreen() {
     };
 
     const hideMapPicker = () => {
+        setSuggestions([]);
+        if (searchDebounceTimer.current) clearTimeout(searchDebounceTimer.current);
         Animated.timing(mapModalSlideAnim, {
             toValue: height,
-            duration: 350,
+            duration: 250,
             useNativeDriver: true,
-        }).start(() => setShowMapPickerModal(false));
+        }).start(() => {
+            setShowMapPickerModal(false);
+        });
     };
+
+
 
     const fetchMyStations = async () => {
         setIsLoadingStations(true);
@@ -388,25 +399,84 @@ export default function PartnerScreen() {
         }
     };
 
-    const handleSearchInMapModal = async () => {
-        if (!modalSearchText.trim()) return;
-        setIsSearchingModal(true);
-        try {
-            if (Location && typeof Location.geocodeAsync === 'function') {
-                const results = await Location.geocodeAsync(modalSearchText.trim());
-                if (results && results.length > 0) {
-                    const lat = results[0].latitude;
-                    const lng = results[0].longitude;
-                    const newCoords = { latitude: lat, longitude: lng };
-                    setPinCoords(newCoords);
-                    animateMapToLocation(lat, lng);
-                    debouncedReverseGeocode(lat, lng);
+    const handleSearchTextChange = (text) => {
+        setModalSearchText(text);
+
+        if (searchDebounceTimer.current) {
+            clearTimeout(searchDebounceTimer.current);
+        }
+
+        if (!text || text.trim().length < 2) {
+            setSuggestions([]);
+            return;
+        }
+
+        searchDebounceTimer.current = setTimeout(async () => {
+            setIsSearchingModal(true);
+            try {
+                const res = await configService.getPlacesAutocomplete(text.trim());
+                if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                    setSuggestions(res.data);
+                } else if (Location && typeof Location.geocodeAsync === 'function') {
+                    const results = await Location.geocodeAsync(text.trim());
+                    if (results && results.length > 0) {
+                        const formatted = results.map((r, i) => ({
+                            description: `${text.trim()} (${r.latitude.toFixed(4)}, ${r.longitude.toFixed(4)})`,
+                            mainText: text.trim(),
+                            secondaryText: `Lat: ${r.latitude.toFixed(4)}, Lng: ${r.longitude.toFixed(4)}`,
+                            lat: r.latitude,
+                            lng: r.longitude,
+                            placeId: `geo_${i}`,
+                        }));
+                        setSuggestions(formatted);
+                    } else {
+                        setSuggestions([]);
+                    }
                 } else {
-                    Alert.alert('Search Notice', `Could not find coordinates for "${modalSearchText.trim()}".`);
+                    setSuggestions([]);
+                }
+            } catch (_err) {
+                setSuggestions([]);
+            } finally {
+                setIsSearchingModal(false);
+            }
+        }, 400);
+    };
+
+    const handleSelectSuggestion = async (item) => {
+        setSuggestions([]);
+        setModalSearchText(item.description || item.mainText);
+        setIsSearchingModal(true);
+
+        try {
+            let lat = item.lat;
+            let lng = item.lng;
+
+            if (!lat || !lng) {
+                const detailsRes = await configService.getPlaceDetails(item.placeId, item.description);
+                if (detailsRes.success && detailsRes.data) {
+                    lat = detailsRes.data.lat;
+                    lng = detailsRes.data.lng;
                 }
             }
+
+            if (!lat || !lng) {
+                if (Location && typeof Location.geocodeAsync === 'function') {
+                    const results = await Location.geocodeAsync(item.description || item.mainText);
+                    if (results && results.length > 0) {
+                        lat = results[0].latitude;
+                        lng = results[0].longitude;
+                    }
+                }
+            }
+
+            if (lat && lng) {
+                const newCoords = { latitude: lat, longitude: lng };
+                setPinCoords(newCoords);
+                animateMapToLocation(lat, lng);
+                debouncedReverseGeocode(lat, lng);
+            }
         } catch (_e) {
-            Alert.alert('Error', 'Geocoding failed for entered address.');
         } finally {
             setIsSearchingModal(false);
         }
@@ -1170,19 +1240,24 @@ export default function PartnerScreen() {
                 transparent={true}
                 animationType="none"
                 onRequestClose={hideMapPicker}
+                statusBarTranslucent={true}
             >
-                <View style={styles.modalOverlay}>
-                    <TouchableOpacity
-                        style={StyleSheet.absoluteFillObject}
-                        activeOpacity={1}
-                        onPress={hideMapPicker}
-                    />
-                    <Animated.View
-                        style={[
-                            styles.mapModalContainer,
-                            { transform: [{ translateY: mapModalSlideAnim }] }
-                        ]}
-                    >
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                >
+                    <View style={styles.modalOverlay}>
+                        <TouchableOpacity
+                            style={StyleSheet.absoluteFillObject}
+                            activeOpacity={1}
+                            onPress={hideMapPicker}
+                        />
+                        <Animated.View
+                            style={[
+                                styles.mapModalContainer,
+                                { transform: [{ translateY: mapModalSlideAnim }] }
+                            ]}
+                        >
                         <View style={styles.modalHandle} />
 
                         <View style={styles.mapModalHeader}>
@@ -1199,12 +1274,20 @@ export default function PartnerScreen() {
                                     placeholder="Search city or area..."
                                     placeholderTextColor="#94a3b8"
                                     value={modalSearchText}
-                                    onChangeText={setModalSearchText}
-                                    onSubmitEditing={handleSearchInMapModal}
+                                    onChangeText={handleSearchTextChange}
+                                    onSubmitEditing={() => {
+                                        if (suggestions.length > 0) {
+                                            handleSelectSuggestion(suggestions[0]);
+                                        }
+                                    }}
                                 />
                                 <TouchableOpacity
                                     style={styles.searchButton}
-                                    onPress={handleSearchInMapModal}
+                                    onPress={() => {
+                                        if (suggestions.length > 0) {
+                                            handleSelectSuggestion(suggestions[0]);
+                                        }
+                                    }}
                                     disabled={isSearchingModal}
                                     activeOpacity={0.8}
                                 >
@@ -1215,6 +1298,35 @@ export default function PartnerScreen() {
                                     )}
                                 </TouchableOpacity>
                             </View>
+
+                            {suggestions.length > 0 && (
+                                <ScrollView
+                                    style={styles.suggestionsListContainer}
+                                    keyboardShouldPersistTaps="handled"
+                                    nestedScrollEnabled={true}
+                                >
+                                    {suggestions.map((item, idx) => (
+                                        <TouchableOpacity
+                                            key={item.placeId || idx}
+                                            style={styles.suggestionRow}
+                                            onPress={() => handleSelectSuggestion(item)}
+                                            activeOpacity={0.7}
+                                        >
+                                            <Ionicons name="location-sharp" size={18} color="#10b981" style={{ marginRight: 10 }} />
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.suggestionMainText} numberOfLines={1}>
+                                                    {item.mainText || item.description}
+                                                </Text>
+                                                {item.secondaryText ? (
+                                                    <Text style={styles.suggestionSecondaryText} numberOfLines={1}>
+                                                        {item.secondaryText}
+                                                    </Text>
+                                                ) : null}
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            )}
                         </View>
 
                         <View style={styles.mapPickerMapArea}>
@@ -1239,9 +1351,13 @@ export default function PartnerScreen() {
                                         }}
                                     />
                                     <View style={styles.centerPinOverlay} pointerEvents="none">
-                                        <View style={styles.centerPinContainer}>
-                                            <MapPin size={48} color="#4CAF50" />
-                                            <View style={styles.centerPinDot} />
+                                        <View style={styles.teardropMarkerContainer}>
+                                            <View style={styles.teardropPinShell}>
+                                                <View style={styles.teardropInnerCircle}>
+                                                    <Ionicons name="flash" size={14} color="#ffffff" />
+                                                </View>
+                                            </View>
+                                            <View style={styles.teardropPointerTip} />
                                         </View>
                                     </View>
                                 </View>
@@ -1304,7 +1420,11 @@ export default function PartnerScreen() {
                                         <body>
                                           <div id="map"></div>
                                           <div class="fixed-pin-wrapper">
-                                            <div class="custom-pin"></div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+                                              <path d="M16 0 C7 0 0 7 0 16 C0 25 13 38 16 40 C19 38 32 25 32 16 C32 7 25 0 16 0 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                                              <circle cx="16" cy="15" r="11" fill="#ef4444"/>
+                                              <path d="M17 7 L10 18 L15 18 L14 24 L22 13 L17 13 Z" fill="#ffffff"/>
+                                            </svg>
                                             <div class="pin-shadow"></div>
                                           </div>
                                           <script>
@@ -1343,7 +1463,7 @@ export default function PartnerScreen() {
 
                         <View style={styles.mapPickerBottomCard}>
                             <View style={styles.pinAddressContainer}>
-                                <MapPin size={22} color="#4CAF50" />
+                                <Ionicons name="location" size={22} color="#10b981" />
                                 <View style={{ flex: 1 }}>
                                     <Text style={styles.pinAddressTitle} numberOfLines={1}>
                                         {pinAddress || 'Selected Location'}
@@ -1370,7 +1490,8 @@ export default function PartnerScreen() {
                         </View>
                     </Animated.View>
                 </View>
-            </Modal>
+            </KeyboardAvoidingView>
+        </Modal>
         </SafeAreaView>
     );
 }
@@ -1693,7 +1814,8 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         paddingTop: 6,
-        height: height * 0.95,
+        flex: 1,
+        maxHeight: height * 0.9,
     },
     mapModalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 6 },
     mapModalTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
@@ -1703,19 +1825,84 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8fafc',
         borderBottomWidth: 1,
         borderBottomColor: '#e2e8f0',
+        zIndex: 100,
+    },
+    suggestionsListContainer: {
+        maxHeight: 180,
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        marginTop: 8,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    suggestionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    suggestionMainText: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#0f172a',
+    },
+    suggestionSecondaryText: {
+        fontSize: 11,
+        color: '#64748b',
+        marginTop: 1,
     },
     mapPickerMapArea: { flex: 1, backgroundColor: '#e2e8f0' },
     centerPinOverlay: {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        marginLeft: -20,
-        marginTop: -34,
+        marginLeft: -16,
+        marginTop: -38,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    centerPinContainer: { alignItems: 'center' },
-    centerPinDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#0f172a', marginTop: -6 },
+    teardropMarkerContainer: { alignItems: 'center', justifyContent: 'center' },
+    teardropPinShell: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#ffffff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 6,
+    },
+    teardropInnerCircle: {
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: '#ef4444',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    teardropPointerTip: {
+        width: 0,
+        height: 0,
+        backgroundColor: 'transparent',
+        borderStyle: 'solid',
+        borderLeftWidth: 5,
+        borderRightWidth: 5,
+        borderTopWidth: 7,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: '#ffffff',
+        marginTop: -2,
+    },
     mapPickerBottomCard: {
         backgroundColor: '#ffffff',
         padding: 14,

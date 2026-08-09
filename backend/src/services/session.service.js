@@ -31,14 +31,19 @@ const createSession = async (req, userId, userData = {}) => {
         req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
 
-    const mongoSession = await Session.create({
-        userId,
-        sessionId: req.sessionID,
-        ipAddress: Array.isArray(ipAddress) ? ipAddress[0] : ipAddress,
-        userAgent,
-        expiresAt,
-        isValid: true,
-    });
+    const mongoSession = await Session.findOneAndUpdate(
+        { sessionId: req.sessionID },
+        {
+            userId,
+            sessionId: req.sessionID,
+            ipAddress: Array.isArray(ipAddress) ? ipAddress[0] : ipAddress,
+            userAgent,
+            expiresAt,
+            isValid: true,
+            lastActiveAt: new Date(),
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
     return {
         expressSession: req.session,

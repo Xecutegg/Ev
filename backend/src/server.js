@@ -12,6 +12,7 @@ import DataBase from './database/index.js';
 import authRoutes from './routes/auth.routes.js';
 import stationRoutes from './routes/station.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
+import configRoutes from './routes/config.routes.js';
 import ApiError from './utils/ApiError.js';
 
 // Import email worker so it starts processing jobs
@@ -65,6 +66,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/config', configRoutes);
 
 // ─── 404 Handler ─────────────────────────────────────────────
 app.use((req, res) => {

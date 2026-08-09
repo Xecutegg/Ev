@@ -454,7 +454,6 @@ function HomeScreen() {
                     <MapView
                         ref={mapRef}
                         style={styles.map}
-                        provider={PROVIDER_GOOGLE}
                         customMapStyle={CLEAN_MAP_STYLE}
                         mapType="standard"
                         initialRegion={currentCoords}

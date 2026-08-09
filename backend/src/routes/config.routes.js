@@ -1,6 +1,5 @@
 import express from 'express';
 import {
-    getGoogleMapsKey,
     reverseGeocode,
     placesAutocomplete,
     getPlaceDetails,
@@ -8,7 +7,6 @@ import {
 
 const router = express.Router();
 
-router.get('/google-maps-key', getGoogleMapsKey);
 router.get('/reverse-geocode', reverseGeocode);
 router.get('/places-autocomplete', placesAutocomplete);
 router.get('/place-details', getPlaceDetails);

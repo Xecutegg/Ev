@@ -23,6 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import stationService from '../services/station.service.js';
 import configService from '../services/config.service.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import CLEAN_MAP_STYLE from '../constants/mapStyle.js';
 import {
     ArrowLeft,
     Plus,
@@ -64,23 +65,7 @@ try {
     WebView = Web.WebView || Web.default || Web;
 } catch (_e) { }
 
-const CLEAN_MAP_STYLE = [
-    { featureType: 'all', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.school', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.government', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.medical', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.park', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.place_of_worship', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.attraction', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.business', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'transit', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'administrative', elementType: 'labels', stylers: [{ visibility: 'on' }] },
-    { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'on' }] },
-];
+
 
 export default function PartnerScreen() {
     const router = useRouter();
@@ -1335,6 +1320,8 @@ export default function PartnerScreen() {
                                     <MapView
                                         ref={modalMapRef}
                                         style={{ flex: 1 }}
+                                        provider={PROVIDER_GOOGLE}
+                                        customMapStyle={CLEAN_MAP_STYLE}
                                         mapType="standard"
                                         initialRegion={{
                                             latitude: pinCoords.latitude,
@@ -1427,7 +1414,7 @@ export default function PartnerScreen() {
                                           </div>
                                           <script>
                                             var map = L.map('map', { zoomControl: false }).setView([${pinCoords.latitude}, ${pinCoords.longitude}], 16);
-                                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                                               maxZoom: 19,
                                               attribution: '© OpenStreetMap'
                                             }).addTo(map);

@@ -8,7 +8,6 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCY0or-189ZRZ-Ig4oJlzLr9tRaZUYCIYo",
         "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api"
       }
     },
@@ -18,14 +17,12 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCY0or-189ZRZ-Ig4oJlzLr9tRaZUYCIYo",
         "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCY0or-189ZRZ-Ig4oJlzLr9tRaZUYCIYo",
         "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api"
       }
     }

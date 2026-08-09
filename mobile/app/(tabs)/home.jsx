@@ -23,7 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import stationService from '../../services/station.service.js';
 import bookingService from '../../services/booking.service.js';
-import configService from '../../services/config.service.js';
+import CLEAN_MAP_STYLE from '../../constants/mapStyle.js';
 
 // Native Map & WebView components
 let MapView, Marker, PROVIDER_GOOGLE, WebView;
@@ -57,26 +57,6 @@ const DEFAULT_LOCATION = {
     longitudeDelta: 0.015,
 };
 
-const CLEAN_MAP_STYLE = [
-    { featureType: 'all', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.school', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.school', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.school', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.government', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.medical', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.park', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.place_of_worship', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.attraction', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi.business', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'transit', elementType: 'all', stylers: [{ visibility: 'off' }] },
-    { featureType: 'administrative', elementType: 'labels', stylers: [{ visibility: 'on' }] },
-    { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'on' }] },
-];
-
 function HomeScreen() {
     const { user, logout } = useAuth();
     const router = useRouter();
@@ -89,7 +69,6 @@ function HomeScreen() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [stations, setStations] = useState([]);
     const [isLoadingStations, setIsLoadingStations] = useState(true);
-    const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
 
     // Slot Booking State
     const [selectedStation, setSelectedStation] = useState(null);
@@ -219,13 +198,6 @@ function HomeScreen() {
     };
 
     useEffect(() => {
-        const fetchMapKey = async () => {
-            const res = await configService.getGoogleMapsKey();
-            if (res.success && res.data?.googleMapsApiKey) {
-                setGoogleMapsApiKey(res.data.googleMapsApiKey);
-            }
-        };
-        fetchMapKey();
         getCurrentLocation();
         fetchStations();
         animateEntrance();
@@ -281,29 +253,20 @@ function HomeScreen() {
 
     const fetchAddressAsync = async (lat, lng) => {
         try {
-            const res = await configService.reverseGeocode(lat, lng);
-            if (res.success && res.data?.address) {
-                setAddress(res.data.address);
-                return;
+            if (Location && typeof Location.reverseGeocodeAsync === 'function') {
+                const [place] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+                if (place) {
+                    const formattedAddress = [
+                        place.name || place.street,
+                        place.city || place.subregion || place.district,
+                        place.region,
+                    ]
+                        .filter(Boolean)
+                        .join(', ');
+                    setAddress(formattedAddress || 'Your Location');
+                }
             }
         } catch (_err) { }
-
-        if (Location && typeof Location.reverseGeocodeAsync === 'function') {
-            Location.reverseGeocodeAsync({ latitude: lat, longitude: lng })
-                .then(([place]) => {
-                    if (place) {
-                        const formattedAddress = [
-                            place.name || place.street,
-                            place.city || place.subregion || place.district,
-                            place.region,
-                        ]
-                            .filter(Boolean)
-                            .join(', ');
-                        setAddress(formattedAddress || 'Your Location');
-                    }
-                })
-                .catch(() => { });
-        }
     };
 
     const getCurrentLocation = async () => {
@@ -419,100 +382,55 @@ function HomeScreen() {
         price: st.priceRate || 15,
     })).filter(st => st.lat && st.lng && !isNaN(st.lat) && !isNaN(st.lng));
 
-    const lightThemeGoogleMapsHtml = `
+    const lightThemeOsmMapHtml = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
       <style>
         html, body, #map { height: 100%; margin: 0; padding: 0; background: #F4FBF4; }
-        .gmnoprint, .gm-style-cc, a[href^="https://maps.google.com/maps"], a[aria-label^="Google"] {
-          display: none !important;
-        }
+        .leaflet-control-attribution { display: none !important; }
       </style>
-      <script src="https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}"></script>
-      <script>
-        var gMap, userPos;
-        function initMap() {
-          userPos = { lat: ${currentCoords.latitude}, lng: ${currentCoords.longitude} };
-          gMap = new google.maps.Map(document.getElementById('map'), {
-            zoom: 16,
-            center: userPos,
-            mapTypeId: 'roadmap',
-            disableDefaultUI: true,
-            zoomControl: false,
-            mapTypeControl: false,
-            scaleControl: false,
-            streetViewControl: false,
-            rotateControl: false,
-            fullscreenControl: false,
-            styles: ${JSON.stringify(CLEAN_MAP_STYLE)}
-          });
-
-          window.gMap = gMap;
-
-          new google.maps.Marker({
-            position: userPos,
-            map: gMap,
-            title: "${user?.name || 'User Location'}",
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              fillColor: '#76C815',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 4,
-              scale: 12,
-              anchor: new google.maps.Point(0, 0)
-            },
-            zIndex: 2
-          });
-
-          new google.maps.Marker({
-            position: userPos,
-            map: gMap,
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              fillColor: '#76C815',
-              fillOpacity: 0.15,
-              strokeColor: '#76C815',
-              strokeWeight: 1.5,
-              scale: 22,
-              anchor: new google.maps.Point(0, 0)
-            },
-            zIndex: 1
-          });
-
-          var stationsData = ${JSON.stringify(stationsDataForWeb)};
-
-          stationsData.forEach(function(st) {
-              if (!st.lat || !st.lng) return;
-              var stPos = { lat: parseFloat(st.lat), lng: parseFloat(st.lng) };
-
-              var stMarker = new google.maps.Marker({
-                  position: stPos,
-                  map: gMap,
-                  title: st.name + " (" + st.power + ")",
-                  icon: {
-                      url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0 C7 0 0 7 0 16 C0 25 13 38 16 40 C19 38 32 25 32 16 C32 7 25 0 16 0 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/><circle cx="16" cy="15" r="11" fill="#ef4444"/><path d="M17 7 L10 18 L15 18 L14 24 L22 13 L17 13 Z" fill="#ffffff"/></svg>'),
-                      size: new google.maps.Size(32, 40),
-                      scaledSize: new google.maps.Size(32, 40),
-                      anchor: new google.maps.Point(16, 40)
-                  },
-                  zIndex: 100
-              });
-
-              stMarker.addListener('click', function() {
-                  if (window.ReactNativeWebView) {
-                      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SELECT_STATION', id: st.id }));
-                  }
-              });
-          });
-        }
-        window.onload = initMap;
-      </script>
     </head>
     <body>
       <div id="map"></div>
+      <script>
+        var map = L.map('map', { zoomControl: false }).setView([${currentCoords.latitude}, ${currentCoords.longitude}], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19
+        }).addTo(map);
+
+        var userIcon = L.divIcon({
+          className: 'custom-user-icon',
+          html: '<div style="background-color:#76C815;width:16px;height:16px;border-radius:50%;border:3px solid #ffffff;box-shadow:0 0 8px rgba(0,0,0,0.3);"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+
+        L.marker([${currentCoords.latitude}, ${currentCoords.longitude}], { icon: userIcon })
+          .addTo(map)
+          .bindPopup("${user?.name || 'Your Location'}");
+
+        var stationsData = ${JSON.stringify(stationsDataForWeb)};
+        var stationIcon = L.divIcon({
+          className: 'custom-station-icon',
+          html: '<div style="background-color:#ef4444;width:24px;height:24px;border-radius:50%;border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);color:white;font-weight:bold;font-size:12px;">⚡</div>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        stationsData.forEach(function(st) {
+          if (!st.lat || !st.lng) return;
+          var marker = L.marker([parseFloat(st.lat), parseFloat(st.lng)], { icon: stationIcon }).addTo(map);
+          marker.on('click', function() {
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SELECT_STATION', id: st.id }));
+            }
+          });
+        });
+      </script>
     </body>
     </html>
 `;
@@ -529,13 +447,15 @@ function HomeScreen() {
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
-                            srcDoc={lightThemeGoogleMapsHtml}
+                            srcDoc={lightThemeOsmMapHtml}
                         />
                     </View>
                 ) : MapView ? (
                     <MapView
                         ref={mapRef}
                         style={styles.map}
+                        provider={PROVIDER_GOOGLE}
+                        customMapStyle={CLEAN_MAP_STYLE}
                         mapType="standard"
                         initialRegion={currentCoords}
                         showsUserLocation={false}
@@ -590,7 +510,7 @@ function HomeScreen() {
                     <WebView
                         ref={webViewRef}
                         originWhitelist={['*']}
-                        source={{ html: lightThemeGoogleMapsHtml }}
+                        source={{ html: lightThemeOsmMapHtml }}
                         style={{ flex: 1 }}
                         onMessage={(event) => {
                             try {

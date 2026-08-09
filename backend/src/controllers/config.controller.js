@@ -3,22 +3,6 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 
 /**
- * Get Google Maps API Key from backend environment configuration
- */
-const getGoogleMapsKey = asyncHandler(async (req, res) => {
-    const key = Config.GOOGLE_MAPS_API_KEY;
-    if (!key) {
-        throw ApiError.notFound('Google Maps API key is not configured on backend.');
-    }
-    return res.status(200).json({
-        success: true,
-        data: {
-            googleMapsApiKey: key,
-        },
-    });
-});
-
-/**
  * Proxy reverse geocode request to Google Maps Geocoding API
  */
 const reverseGeocode = asyncHandler(async (req, res) => {
@@ -173,4 +157,4 @@ const getPlaceDetails = asyncHandler(async (req, res) => {
     }
 });
 
-export { getGoogleMapsKey, reverseGeocode, placesAutocomplete, getPlaceDetails };
+export { reverseGeocode, placesAutocomplete, getPlaceDetails };

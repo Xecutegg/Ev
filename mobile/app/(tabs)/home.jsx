@@ -313,9 +313,24 @@ function HomeScreen() {
                 const { status } = await Location.requestForegroundPermissionsAsync();
                 if (status === 'granted') {
                     try {
-                        const currentPos = await Location.getCurrentPositionAsync({ 
-                            accuracy: Location.Accuracy.Balanced 
-                        });
+                        const lastPos = await Location.getLastKnownPositionAsync({});
+                        if (lastPos && lastPos.coords) {
+                            const coords = {
+                                latitude: lastPos.coords.latitude,
+                                longitude: lastPos.coords.longitude,
+                                latitudeDelta: 0.015,
+                                longitudeDelta: 0.015,
+                            };
+                            setLocation(coords);
+                            animateMapTo(coords);
+                            fetchAddressAsync(coords.latitude, coords.longitude);
+                        }
+
+                        const currentPos = await Promise.race([
+                            Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Location timeout')), 6000))
+                        ]);
+
                         if (currentPos && currentPos.coords) {
                             const coords = {
                                 latitude: currentPos.coords.latitude,

@@ -4,11 +4,17 @@ const configService = {
     getGoogleMapsKey: async () => {
         try {
             const response = await api.get('/config/google-maps-key');
-            return response.data;
+            if (response.data && response.data.success && response.data.data?.googleMapsApiKey) {
+                return response.data;
+            }
         } catch (error) {
             console.warn('Failed to fetch Google Maps API key from backend:', error.message);
-            return { success: false, data: null };
         }
+        const envKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyCY0or-189ZRZ-Ig4oJlzLr9tRaZUYCIYo';
+        return {
+            success: true,
+            data: { googleMapsApiKey: envKey }
+        };
     },
 
     reverseGeocode: async (lat, lng) => {

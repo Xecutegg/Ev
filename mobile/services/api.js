@@ -6,8 +6,8 @@ import * as SecureStore from 'expo-secure-store';
 // For Android emulator: http://10.0.2.2:2415
 // For iOS simulator: http://localhost:2415
 // For physical device: http://<your-ip>:2415
-// const BASE_URL = 'https://www.ev.onedreamesports.in/api';
-const BASE_URL = 'http://192.168.29.44:2415/api';
+const BASE_URL = 'https://www.ev.onedreamesports.in/api';
+// const BASE_URL = 'http://192.168.29.44:2415/api';
 
 const ACCESS_TOKEN_KEY = 'ev_access_token';
 const REFRESH_TOKEN_KEY = 'ev_refresh_token';

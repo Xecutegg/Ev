@@ -51,19 +51,9 @@ import {
 
 const { width, height } = Dimensions.get('window');
 
-// Native Map & WebView components
-let MapView, Marker, PROVIDER_GOOGLE, WebView;
-try {
-    const Maps = require('react-native-maps');
-    MapView = Maps.default || Maps;
-    Marker = Maps.Marker;
-    PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
-} catch (_e) { }
-
-try {
-    const Web = require('react-native-webview');
-    WebView = Web.WebView || Web.default || Web;
-} catch (_e) { }
+// Native MapLibre & WebView components
+import { Map as MapView, Camera } from '@maplibre/maplibre-react-native';
+import { WebView } from 'react-native-webview';
 
 
 
@@ -93,6 +83,7 @@ export default function PartnerScreen() {
 
     // Map References & Timers
     const modalMapRef = useRef(null);
+    const modalCameraRef = useRef(null);
     const webMapIframeRef = useRef(null);
     const geocodeTimerRef = useRef(null);
 
@@ -306,16 +297,12 @@ export default function PartnerScreen() {
     };
 
     const animateMapToLocation = (lat, lng) => {
-        if (modalMapRef.current && modalMapRef.current.animateToRegion) {
-            modalMapRef.current.animateToRegion(
-                {
-                    latitude: lat,
-                    longitude: lng,
-                    latitudeDelta: 0.008,
-                    longitudeDelta: 0.008,
-                },
-                1000
-            );
+        if (modalCameraRef.current && modalCameraRef.current.flyTo) {
+            modalCameraRef.current.flyTo({
+                center: [lng, lat],
+                zoom: 15,
+                duration: 1000,
+            });
         }
         if (webMapIframeRef.current && webMapIframeRef.current.contentWindow) {
             webMapIframeRef.current.contentWindow.postMessage(
@@ -1320,20 +1307,30 @@ export default function PartnerScreen() {
                                     <MapView
                                         ref={modalMapRef}
                                         style={{ flex: 1 }}
-                                        customMapStyle={CLEAN_MAP_STYLE}
-                                        mapType="standard"
-                                        initialRegion={{
-                                            latitude: pinCoords.latitude,
-                                            longitude: pinCoords.longitude,
-                                            latitudeDelta: 0.008,
-                                            longitudeDelta: 0.008,
+                                        mapStyle={CLEAN_MAP_STYLE}
+                                        logoEnabled={false}
+                                        attributionEnabled={false}
+                                        compassEnabled={false}
+                                        onCameraChanged={(e) => {
+                                            const center = e?.properties?.center || e?.nativeEvent?.center || e?.geometry?.coordinates;
+                                            if (Array.isArray(center) && center.length >= 2) {
+                                                const lng = center[0];
+                                                const lat = center[1];
+                                                if (typeof lat === 'number' && typeof lng === 'number' && Number.isFinite(lat) && Number.isFinite(lng)) {
+                                                    setPinCoords({ latitude: lat, longitude: lng });
+                                                    debouncedReverseGeocode(lat, lng);
+                                                }
+                                            }
                                         }}
-                                        onRegionChangeComplete={(region) => {
-                                            const newCoords = { latitude: region.latitude, longitude: region.longitude };
-                                            setPinCoords(newCoords);
-                                            debouncedReverseGeocode(region.latitude, region.longitude);
-                                        }}
-                                    />
+                                    >
+                                        <Camera
+                                            ref={modalCameraRef}
+                                            initialViewState={{
+                                                center: [pinCoords.longitude, pinCoords.latitude],
+                                                zoom: 15,
+                                            }}
+                                        />
+                                    </MapView>
                                     <View style={styles.centerPinOverlay} pointerEvents="none">
                                         <View style={styles.teardropMarkerContainer}>
                                             <View style={styles.teardropPinShell}>

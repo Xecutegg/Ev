@@ -8,7 +8,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api"
+        "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api",
+        "EXPO_PUBLIC_MAPTILER_KEY": "qy8NKpz2Rwhggyjgyk55"
       }
     },
     "preview": {
@@ -17,13 +18,15 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api"
+        "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api",
+        "EXPO_PUBLIC_MAPTILER_KEY": "qy8NKpz2Rwhggyjgyk55"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api"
+        "EXPO_PUBLIC_API_URL": "https://www.ev.onedreamesports.in/api",
+        "EXPO_PUBLIC_MAPTILER_KEY": "qy8NKpz2Rwhggyjgyk55"
       }
     }
   },

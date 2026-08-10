@@ -25,19 +25,9 @@ import stationService from '../../services/station.service.js';
 import bookingService from '../../services/booking.service.js';
 import CLEAN_MAP_STYLE from '../../constants/mapStyle.js';
 
-// Native Map & WebView components
-let MapView, Marker, PROVIDER_GOOGLE, WebView;
-try {
-    const Maps = require('react-native-maps');
-    MapView = Maps.default || Maps;
-    Marker = Maps.Marker;
-    PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
-} catch (_e) { }
-
-try {
-    const Web = require('react-native-webview');
-    WebView = Web.WebView || Web.default || Web;
-} catch (_e) { }
+// Native MapLibre & WebView components
+import { Map as MapView, Camera, Marker } from '@maplibre/maplibre-react-native';
+import { WebView } from 'react-native-webview';
 
 const { width, height } = Dimensions.get('window');
 const isSmallScreen = width < 380;
@@ -90,6 +80,7 @@ function HomeScreen() {
     const bookingSlideAnim = useRef(new Animated.Value(height)).current;
 
     const mapRef = useRef(null);
+    const cameraRef = useRef(null);
     const webViewRef = useRef(null);
 
     const generateTimeSlots = (st) => {
@@ -246,8 +237,12 @@ function HomeScreen() {
 
     const animateMapTo = (coords) => {
         if (!coords || !coords.latitude || !coords.longitude) return;
-        if (mapRef.current && mapRef.current.animateToRegion) {
-            mapRef.current.animateToRegion(coords, 800);
+        if (cameraRef.current && cameraRef.current.flyTo) {
+            cameraRef.current.flyTo({
+                center: [coords.longitude, coords.latitude],
+                zoom: 14,
+                duration: 800,
+            });
         }
     };
 
@@ -454,18 +449,23 @@ function HomeScreen() {
                     <MapView
                         ref={mapRef}
                         style={styles.map}
-                        customMapStyle={CLEAN_MAP_STYLE}
-                        mapType="standard"
-                        initialRegion={currentCoords}
-                        showsUserLocation={false}
-                        showsMyLocationButton={false}
-                        showsCompass={false}
+                        mapStyle={CLEAN_MAP_STYLE}
+                        logoEnabled={false}
+                        attributionEnabled={false}
+                        compassEnabled={false}
                     >
+                        <Camera
+                            ref={cameraRef}
+                            initialViewState={{
+                                center: [currentCoords.longitude, currentCoords.latitude],
+                                zoom: 14,
+                            }}
+                        />
+
                         {location && (
                             <Marker
-                                coordinate={location}
-                                title={user?.name || 'My Location'}
-                                description={address}
+                                id="user-location-marker"
+                                lngLat={[location.longitude, location.latitude]}
                                 anchor={{ x: 0.5, y: 0.5 }}
                             >
                                 <View style={styles.gmapMarkerContainer}>
@@ -478,29 +478,32 @@ function HomeScreen() {
                         )}
 
                         {stations.map((st) => {
-                            const lat = st.location?.coordinates?.[1];
-                            const lng = st.location?.coordinates?.[0];
+                            const lat = parseFloat(st.location?.coordinates?.[1]);
+                            const lng = parseFloat(st.location?.coordinates?.[0]);
 
-                            if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+                            if (isNaN(lat) || isNaN(lng) || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
                             return (
                                 <Marker
                                     key={st._id}
-                                    coordinate={{
-                                        latitude: parseFloat(lat),
-                                        longitude: parseFloat(lng)
-                                    }}
+                                    id={`station-${st._id}`}
+                                    lngLat={[lng, lat]}
                                     onPress={() => openSlotBookingModal(st)}
                                     anchor={{ x: 0.5, y: 1.0 }}
                                 >
-                                    <View style={styles.teardropMarkerContainer}>
-                                        <View style={styles.teardropPinShell}>
-                                            <View style={styles.teardropInnerCircle}>
-                                                <Ionicons name="flash" size={rs(13)} color="#ffffff" />
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        onPress={() => openSlotBookingModal(st)}
+                                    >
+                                        <View style={styles.teardropMarkerContainer}>
+                                            <View style={styles.teardropPinShell}>
+                                                <View style={styles.teardropInnerCircle}>
+                                                    <Ionicons name="flash" size={rs(13)} color="#ffffff" />
+                                                </View>
                                             </View>
+                                            <View style={styles.teardropPointerTip} />
                                         </View>
-                                        <View style={styles.teardropPointerTip} />
-                                    </View>
+                                    </TouchableOpacity>
                                 </Marker>
                             );
                         })}
